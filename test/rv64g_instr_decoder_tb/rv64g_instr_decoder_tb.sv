@@ -759,32 +759,43 @@ module rv64g_instr_decoder_tb;
         @(posedge clk_i);
         tx_all++;
         if (exp_cmd_o !== cmd_o && exp_cmd_o.func !== '0 && cmd_o.func !== '0) begin
-
-          // GEN Func Name
-          func_t func;
-          func = func_t'($clog2(exp_cmd_o.func));
-          $display();
-          $write("\033[1;31m[%0t]%s has faults at 0x%08h\033[0m DUT:", $realtime, func.name,
-                 code_i);
-          foreach (cmd_o.func[i]) begin
-            if (cmd_o.func[i]) begin
-              func = func_t'(i);
-              $write(" %s", func.name);
-            end
+          if (exp_cmd_o.pc !== cmd_o.pc) pc_ok = 0;
+          else tx_pc++;
+          if (exp_cmd_o.func !== cmd_o.func) func_ok = 0;
+          else tx_func++;
+          if (exp_cmd_o.rd !== cmd_o.rd) rd_ok = 0;
+          else tx_rd++;
+          if (exp_cmd_o.rs1 !== cmd_o.rs1) begin
+            $write("[%.3t] cmd_o.rs1:     0b%b\n", $realtime, cmd_o.rs1);
+            $write("[%.3t] exp_cmd_o.rs1: 0b%b\n", $realtime, exp_cmd_o.rs1);
+            $write("cmd_o.func:     %p\nexp_cmd_o.func: %p\n", cmd_o.func, exp_cmd_o.func);
+            $write("cmd_o:     %p\n", cmd_o);
+            $write("exp_cmd_o: %p\n\n", exp_cmd_o);
+            rs1_ok = 0;
+          end else tx_rs1++;
+          if (exp_cmd_o.rs2 !== cmd_o.rs2) begin
+            $write("[%.3t] cmd_o.rs2:     0b%b\n", $realtime, cmd_o.rs2);
+            $write("[%.3t] exp_cmd_o.rs2: 0b%b\n", $realtime, exp_cmd_o.rs2);
+            $write("cmd_o.func:     %p\nexp_cmd_o.func: %p\n", cmd_o.func, exp_cmd_o.func);
+            $write("cmd_o:     %p\n", cmd_o);
+            $write("exp_cmd_o: %p\n\n", exp_cmd_o);
+            rs2_ok = 0;
+          end else tx_rs2++;
+          if (exp_cmd_o.rs3 !== cmd_o.rs3) rs3_ok = 0;
+          else tx_rs3++;
+          if (exp_cmd_o.jump !== cmd_o.jump) jump_ok = 0;
+          else tx_jump++;
+          if (exp_cmd_o.imm !== cmd_o.imm) begin
+            $write("[%.3t] cmd_o.imm:     0b%b\n", $realtime, cmd_o.imm);
+            $write("[%.3t] exp_cmd_o.imm: 0b%b\n", $realtime, exp_cmd_o.imm);
+            $write("cmd_o.func:     %p\nexp_cmd_o.func: %p\n", cmd_o.func, exp_cmd_o.func);
+            $write("cmd_o:     %p\n", cmd_o);
+            $write("exp_cmd_o: %p\n\n", exp_cmd_o);
+            imm_ok = 0;
           end
-          $display();
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(pc)
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(func)
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(rd)
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(rs1)
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(rs2)
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(rs3)
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(blocking)
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(imm)
-          `RV64G_INSTR_DECODER_TB_MON_CHECK(reg_req)
-          $display();
-          result_print(0, "Test Failed due to fault");
-          $finish;
+          else tx_imm++;
+          if (exp_cmd_o.reg_req !== cmd_o.reg_req) reg_req_ok = 0;
+          else tx_reg_req++;
         end else begin
           tx_pc++;
           tx_func++;
