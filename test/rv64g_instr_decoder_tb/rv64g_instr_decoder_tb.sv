@@ -783,8 +783,8 @@ module rv64g_instr_decoder_tb;
           end else tx_rs2++;
           if (exp_cmd_o.rs3 !== cmd_o.rs3) rs3_ok = 0;
           else tx_rs3++;
-          if (exp_cmd_o.jump !== cmd_o.jump) jump_ok = 0;
-          else tx_jump++;
+          if (exp_cmd_o.blocking !== cmd_o.blocking) blocking_ok = 0;
+          else tx_blocking++;
           if (exp_cmd_o.imm !== cmd_o.imm) begin
             $write("[%.3t] cmd_o.imm:     0b%b\n", $realtime, cmd_o.imm);
             $write("[%.3t] exp_cmd_o.imm: 0b%b\n", $realtime, exp_cmd_o.imm);
@@ -991,7 +991,7 @@ module rv64g_instr_decoder_tb;
     automatic bit keep_going = 1;
     func_t instr;
     while (keep_going) begin
-      repeat (5000) @(posedge clk_i);
+      repeat (15000) @(posedge clk_i);
       $write("\033[1;33m%0t Remaining:\033[0m", $realtime);
       keep_going = 0;
       foreach (hit_count[i]) begin
