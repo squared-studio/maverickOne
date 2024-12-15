@@ -1,15 +1,15 @@
 /*
 Description
 Author : S. M. Tahmeed Reza (https://github.com/tahmeedKENJI)
-This file is part of DSInnovators:rv64g-core
+This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-`include "rv64g_pkg.sv"
+`include "maverickOne_pkg.sv"
 
-module rv64g_instr_launcher_tb;
+module maverickOne_instr_launcher_tb;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-IMPORTS
@@ -18,8 +18,8 @@ module rv64g_instr_launcher_tb;
   // bring in the testbench essentials functions and macros
   `include "vip/tb_ess.sv"
 
-  import rv64g_pkg::decoded_instr_t;  // Type for decoded instructions
-  import rv64g_pkg::NUM_REGS;  // Number of registers
+  import maverickOne_pkg::decoded_instr_t;  // Type for decoded instructions
+  import maverickOne_pkg::NUM_REGS;  // Number of registers
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-LOCALPARAMS
@@ -60,7 +60,7 @@ module rv64g_instr_launcher_tb;
   //-RTLS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  rv64g_instr_launcher #() u_instr_lnchr_1 (
+  maverickOne_instr_launcher #() u_instr_lnchr_1 (
       .arst_ni,
       .clk_i,
       .clear_i,
@@ -102,7 +102,7 @@ module rv64g_instr_launcher_tb;
         @(posedge clk_i);
         locks_i <= $urandom_range(0, (2 ** (NUM_REGS) - 1));  // register locks profile input
 
-        // instr_in_i.func <= rv64g_pkg::func_t'($urandom);
+        // instr_in_i.func <= maverickOne_pkg::func_t'($urandom);
         instr_in_i.rd <= $urandom_range(0, NUM_REGS - 1);
         // instr_in_i.rs1 <= $urandom_range(0, NUM_REGS-1);
         // instr_in_i.rs2 <= $urandom_range(0, NUM_REGS-1);
@@ -130,7 +130,7 @@ module rv64g_instr_launcher_tb;
     decoded_instr_t __instr_in__;
     decoded_instr_t __instr_out__;
 
-    mailbox #(decoded_instr_t) in_mbx = new(rv64g_pkg::NUM_OUTSTANDING);
+    mailbox #(decoded_instr_t) in_mbx = new(maverickOne_pkg::NUM_OUTSTANDING);
     mailbox #(decoded_instr_t) out_mbx = new();
     fork
       begin

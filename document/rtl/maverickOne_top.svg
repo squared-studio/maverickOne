@@ -34,6 +34,6 @@
 <text x="680" y="585" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">dcache_data_i</text>
 <polygon points="685,645 705,645 715,635 735,635 735,645 735,655 715,655 705,645 685,645"/>
 <text x="680" y="635" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">dcache_gnt_i</text>
-<text x="370" y="700" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">rv64g_core</text>
+<text x="370" y="700" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">maverickOne</text>
 </g>
 </svg>

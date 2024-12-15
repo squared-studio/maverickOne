@@ -1,14 +1,14 @@
-# rv64g_instr_decoder (module)
+# maverickOne_instr_decoder (module)
 
 ### Author : Foez Ahmed (https://github.com/foez-ahmed)
 
 ## TOP IO
-<img src="./rv64g_instr_decoder_top.svg">
+<img src="./maverickOne_instr_decoder_top.svg">
 
 ## Description
 
 This module is mean to decode instruction into the decoded_instr_t as mentioned in the
-[rv64g_pkg](../../include/rv64g_pkg.sv).
+[maverickOne_pkg](../../include/maverickOne_pkg.sv).
 - The `func` field enumerates the function that the current instruction.
 - The `rd` is the destination register ant the `rs1`, `rs2` & `rs3` are the source registers. An
   offset of 32 is added for the floating point registers' address.
@@ -25,7 +25,7 @@ This module is mean to decode instruction into the decoded_instr_t as mentioned 
 See the [ISA Manual](https://riscv.org/wp-content/uploads/2019/12/riscv-spec-20191213.pdf)'s Chapter
 24 (RV32/64G Instruction Set Listings) for the encoding.
 
-<br>**This file is part of DSInnovators:rv64g-core**
+<br>**This file is part of DSInnovators:maverickOne**
 <br>**Copyright (c) 2024 DSInnovators**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
@@ -33,8 +33,8 @@ See the [ISA Manual](https://riscv.org/wp-content/uploads/2019/12/riscv-spec-201
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|
 |-|-|-|-|-|
-|XLEN|int||rv64g_pkg::XLEN| interger register width|
-|decoded_instr_t|type||rv64g_pkg::decoded_instr_t| type definition of decoded instruction|
+|XLEN|int||maverickOne_pkg::XLEN| interger register width|
+|decoded_instr_t|type||maverickOne_pkg::decoded_instr_t| type definition of decoded instruction|
 
 ## Ports
 |Name|Direction|Type|Dimension|Description|

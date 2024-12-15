@@ -1,28 +1,28 @@
-# rv64g_instr_launcher (module)
+# maverickOne_instr_launcher (module)
 
 ### Author : Foez Ahmed (https://github.com/foez-ahmed)
 
 ## TOP IO
-<img src="./rv64g_instr_launcher_top.svg">
+<img src="./maverickOne_instr_launcher_top.svg">
 
 ## Description
 
-The rv64g_instr_launcher module manages the instructions heading for execution. It temporarily store
+The maverickOne_instr_launcher module manages the instructions heading for execution. It temporarily store
 instructions, checks register availability, and launches them for execution avoiding hazzards.
 
-<br>**This file is part of DSInnovators:rv64g-core**
+<br>**This file is part of DSInnovators:maverickOne**
 <br>**Copyright (c) 2024 DSInnovators**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 
-<img src="./rv64g_instr_launcher_des.svg">
+<img src="./maverickOne_instr_launcher_des.svg">
 
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|
 |-|-|-|-|-|
-|decoded_instr_t|type||rv64g_pkg::decoded_instr_t|Type for decoded instructions|
-|NR|int||rv64g_pkg::NUM_REGS|Number of registers|
-|locks_t|type||logic [NR-1:0]|Type for lock signals|
+|decoded_instr_t|type||maverickOne_pkg::decoded_instr_t| Type for decoded instructions|
+|NR|int||maverickOne_pkg::NUM_REGS| Number of registers|
+|locks_t|type||logic [NR-1:0]| Type for lock signals|
 
 ## Ports
 |Name|Direction|Type|Dimension|Description|

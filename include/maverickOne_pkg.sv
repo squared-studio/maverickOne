@@ -1,15 +1,15 @@
 /*
 Author : Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:rv64g-core
+This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-`ifndef RV64G_PKG_SV__
-`define RV64G_PKG_SV__ 0
+`ifndef MAVERICKONE_PKG_SV__
+`define MAVERICKONE_PKG_SV__ 0
 
-package rv64g_pkg;
+package maverickOne_pkg;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   // PARAMETERS
@@ -28,7 +28,7 @@ package rv64g_pkg;
   parameter int NUM_REGS = NUM_GPR + NUM_FPR;
 
   ////////////////////////////////////////////////
-  // RV64G_INSTR_LAUNCHER
+  // maverickOne_INSTR_LAUNCHER
   ////////////////////////////////////////////////
 
   parameter int NUM_OUTSTANDING = 7;

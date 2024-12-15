@@ -1,5 +1,5 @@
 /*
-The rv64g_core module is designed to interface with instruction and data caches in a RISC-V 64-bit
+The maverickOne module is designed to interface with instruction and data caches in a RISC-V 64-bit
 architecture. It handles memory requests, data transfers, and interrupt management, making it
 essential for efficient processor operation. Here's a detailed description of its functionality:
 - **Memory Requests**: Manages requests to instruction and data caches, ensuring proper data flow
@@ -9,13 +9,13 @@ essential for efficient processor operation. Here's a detailed description of it
 - **Interrupt Management**: Processes interrupt requests, determines the active interrupt, and
   acknowledges interrupts, ensuring timely and efficient interrupt handling.
 Author : Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:rv64g-core
+This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-module rv64g_core #(
+module maverickOne #(
     localparam int AW   = 64,  // Address width
     localparam int ICDW = 32,  // I-Cache data width
     localparam int DCDW = 64   // D-Cache data width

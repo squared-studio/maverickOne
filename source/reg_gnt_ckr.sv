@@ -3,16 +3,16 @@ It handles register locking and arbitration in a pipelined environment for a RIS
 ensures that necessary registers are locked/unlocked based on the current pipeline state and the
 requirements of instructions being executed.
 Author : Subhan Zawad Bihan (https://github.com/SubhanBihan)
-This file is part of DSInnovators:rv64g-core
+This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-`include "rv64g_pkg.sv"
+`include "maverickOne_pkg.sv"
 
 module reg_gnt_ckr #(
-    parameter int NR = rv64g_pkg::NUM_REGS  // Number of registers
+    parameter int NR = maverickOne_pkg::NUM_REGS  // Number of registers
 ) (
     // 1 for valid instruction from pipeline.
     input logic pl_valid_i,

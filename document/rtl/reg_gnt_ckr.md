@@ -10,7 +10,7 @@
 It handles register locking and arbitration in a pipelined environment for a RISC-V core. The module
 ensures that necessary registers are locked/unlocked based on the current pipeline state and the
 requirements of instructions being executed.
-<br>**This file is part of DSInnovators:rv64g-core**
+<br>**This file is part of DSInnovators:maverickOne**
 <br>**Copyright (c) 2024 DSInnovators**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
@@ -18,7 +18,7 @@ requirements of instructions being executed.
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|
 |-|-|-|-|-|
-|NR|int||rv64g_pkg::NUM_REGS|Number of registers|
+|NR|int||maverickOne_pkg::NUM_REGS|Number of registers|
 
 ## Ports
 |Name|Direction|Type|Dimension|Description|

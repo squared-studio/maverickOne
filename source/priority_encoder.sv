@@ -5,7 +5,7 @@ priority arbiter to generate a one-hot encoded signal of the highest priority re
 encoded signal is then passed to a simple encoder module, which converts it into a binary index
 representing the active input wire.
 Author : Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:rv64g-core
+This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
 Licensed under the MIT License
 See LICENSE file in the project root for full license information

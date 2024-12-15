@@ -1,19 +1,19 @@
 /*
-The rv64g_regfile module is designed to implement a register file with 64 registers, each 64 bits
+The maverickOne_regfile module is designed to implement a register file with 64 registers, each 64 bits
 wide, for the RISC-V 64-bit architecture. This module supports locking and unlocking specific
 registers, making it suitable for operations that require controlled access to the registers.
 Author : Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:rv64g-core
+This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-`include "rv64g_pkg.sv"
+`include "maverickOne_pkg.sv"
 
-module rv64g_regfile #(
-    localparam int NR = rv64g_pkg::NUM_REGS,  // Number of registers
-    localparam int DW = rv64g_pkg::XLEN,  // Data/Register Width
+module maverickOne_regfile #(
+    localparam int NR = maverickOne_pkg::NUM_REGS,  // Number of registers
+    localparam int DW = maverickOne_pkg::XLEN,  // Data/Register Width
     localparam int AW = $clog2(NR)  // Address Width (log base 2 of the number of registers)
 ) (
     input logic arst_ni,  // Asynchronous reset, active low

@@ -88,7 +88,7 @@ test/$(TOP)/$(TOP).sv:
 	| sed "s/Author : name (email)/Author : $(USER_NAME) ($(GIT_ID))/g" \
 	| sed "s/module tb_model;/module $(TOP);/g" \
 	| sed "s/squared-studio/DSInnovators/g" \
-	| sed "s/sv-genesis/rv64g-core/g" \
+	| sed "s/sv-genesis/maverickOne/g" \
 	> test/$(TOP)/$(TOP).sv
 
 test/$(TOP)/xsim_$(CONFIG)_cfg:
@@ -103,7 +103,7 @@ source/$(RTL).sv:
 	| sed "s/Author : name (email)/Author : $(USER_NAME) ($(GIT_ID))/g" \
 	| sed "s/module rtl_model/module $(RTL)/g" \
 	| sed "s/squared-studio/DSInnovators/g" \
-	| sed "s/sv-genesis/rv64g-core/g" \
+	| sed "s/sv-genesis/maverickOne/g" \
 	> source/$(RTL).sv
 
 #########################################################################################
@@ -343,7 +343,7 @@ clean: soft_clean
 	@rm -rf $(shell find -name "temp_*")
 	@$(foreach word, $(shell cat .gitignore), rm -rf $(shell find $(shell realpath .) -name "$(word)");)
 
-LINE_1 := This file is part of DSInnovators:rv64g-core
+LINE_1 := This file is part of DSInnovators:maverickOne
 LINE_2 := Copyright (c) $(shell date +%Y) DSInnovators
 LINE_3 := Licensed under the MIT License
 LINE_4 := See LICENSE file in the project root for full license information

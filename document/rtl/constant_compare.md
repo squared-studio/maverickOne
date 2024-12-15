@@ -9,7 +9,7 @@
 
 This module generates simple AND gate for comparing a number with a constant expression. The output
 of match is also predefined for both true and false.
-<br>**This file is part of DSInnovators:rv64g-core**
+<br>**This file is part of DSInnovators:maverickOne**
 <br>**Copyright (c) 2024 DSInnovators**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**

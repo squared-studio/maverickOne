@@ -1,20 +1,23 @@
 /*
-The rv64g_instr_launcher module manages the instructions heading for execution. It temporarily store
+The maverickOne_instr_launcher module manages the instructions heading for execution. It temporarily store
 instructions, checks register availability, and launches them for execution avoiding hazzards.
 
 Author: Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:rv64g-core
+This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-`include "rv64g_pkg.sv"
+`include "maverickOne_pkg.sv"
 
-module rv64g_instr_launcher #(
-    localparam type decoded_instr_t = rv64g_pkg::decoded_instr_t,  // Type for decoded instructions
-    localparam int NR = rv64g_pkg::NUM_REGS,  // Number of registers
-    localparam type locks_t = logic [NR-1:0]  // Type for lock signals
+module maverickOne_instr_launcher #(
+    // Type for decoded instructions
+    localparam type decoded_instr_t = maverickOne_pkg::decoded_instr_t,
+    // Number of registers
+    localparam int NR = maverickOne_pkg::NUM_REGS,
+    // Type for lock signals
+    localparam type locks_t = logic [NR-1:0]
 ) (
     input logic arst_ni,  // Asynchronous reset, active low
     input logic clk_i,    // Clock input
@@ -31,14 +34,14 @@ module rv64g_instr_launcher #(
     input  logic           instr_out_ready_i   // Ready signal for outgoing instruction
 );
 
-  import rv64g_pkg::*;
+  import maverickOne_pkg::*;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-LOCALPARAMS GENERATED
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Maximum Number of outstanding instructions
-  localparam int NOS = rv64g_pkg::NUM_OUTSTANDING;
+  localparam int NOS = maverickOne_pkg::NUM_OUTSTANDING;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-SIGNALS

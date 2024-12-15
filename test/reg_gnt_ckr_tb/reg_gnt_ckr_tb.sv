@@ -1,13 +1,13 @@
 /*
 Description
 Author : S. M. Tahmeed Reza (https://github.com/tahmeedKENJI)
-This file is part of DSInnovators:rv64g-core
+This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-`include "rv64g_pkg.sv"
+`include "maverickOne_pkg.sv"
 
 module reg_gnt_ckr_tb;
 
@@ -22,7 +22,7 @@ module reg_gnt_ckr_tb;
   //-LOCALPARAMS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  localparam int NR = rv64g_pkg::NUM_REGS;
+  localparam int NR = maverickOne_pkg::NUM_REGS;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-TYPEDEFS
