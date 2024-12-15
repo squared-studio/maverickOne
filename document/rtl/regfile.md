@@ -1,13 +1,13 @@
-# maverickOne_regfile (module)
+# regfile (module)
 
 ### Author : Foez Ahmed (https://github.com/foez-ahmed)
 
 ## TOP IO
-<img src="./maverickOne_regfile_top.svg">
+<img src="./regfile_top.svg">
 
 ## Description
 
-The maverickOne_regfile module is designed to implement a register file with 64 registers, each 64 bits
+The regfile module is designed to implement a register file with 64 registers, each 64 bits
 wide, for the RISC-V 64-bit architecture. This module supports locking and unlocking specific
 registers, making it suitable for operations that require controlled access to the registers.
 <br>**This file is part of DSInnovators:maverickOne**

@@ -1,5 +1,5 @@
 /*
-The maverickOne_instr_launcher module manages the instructions heading for execution. It temporarily store
+The instr_launcher module manages the instructions heading for execution. It temporarily store
 instructions, checks register availability, and launches them for execution avoiding hazzards.
 
 Author: Foez Ahmed (https://github.com/foez-ahmed)
@@ -11,7 +11,7 @@ See LICENSE file in the project root for full license information
 
 `include "maverickOne_pkg.sv"
 
-module maverickOne_instr_launcher #(
+module instr_launcher #(
     // Type for decoded instructions
     localparam type decoded_instr_t = maverickOne_pkg::decoded_instr_t,
     // Number of registers

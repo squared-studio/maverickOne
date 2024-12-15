@@ -1,9 +1,9 @@
-# maverickOne_instr_decoder (module)
+# instr_decoder (module)
 
 ### Author : Foez Ahmed (https://github.com/foez-ahmed)
 
 ## TOP IO
-<img src="./maverickOne_instr_decoder_top.svg">
+<img src="./instr_decoder_top.svg">
 
 ## Description
 

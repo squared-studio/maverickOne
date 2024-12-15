@@ -28,7 +28,7 @@ package maverickOne_pkg;
   parameter int NUM_REGS = NUM_GPR + NUM_FPR;
 
   ////////////////////////////////////////////////
-  // maverickOne_INSTR_LAUNCHER
+  // instr_launcher
   ////////////////////////////////////////////////
 
   parameter int NUM_OUTSTANDING = 7;

@@ -9,7 +9,7 @@ See LICENSE file in the project root for full license information
 
 `include "maverickOne_pkg.sv"
 
-module maverickOne_instr_launcher_tb;
+module instr_launcher_tb;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-IMPORTS
@@ -60,7 +60,7 @@ module maverickOne_instr_launcher_tb;
   //-RTLS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  maverickOne_instr_launcher #() u_instr_lnchr_1 (
+  instr_launcher #() u_instr_lnchr_1 (
       .arst_ni,
       .clk_i,
       .clear_i,

@@ -28,6 +28,6 @@
 <text x="980" y="835" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">valid_o</text>
 <polygon points="985,945 1005,945 1015,935 1025,935 1035,945 1025,955 1015,955 1005,945 985,945"/>
 <text x="980" y="935" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">out</text>
-<text x="520" y="1000" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">maverickOne_exe_mult</text>
+<text x="520" y="1000" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">exe_mult</text>
 </g>
 </svg>

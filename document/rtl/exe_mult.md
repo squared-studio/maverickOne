@@ -1,9 +1,9 @@
-# maverickOne_exe_mult (module)
+# exe_mult (module)
 
 ### Author : Foez Ahmed (https://github.com/foez-ahmed)
 
 ## TOP IO
-<img src="./maverickOne_exe_mult_top.svg">
+<img src="./exe_mult_top.svg">
 
 ## Description
 

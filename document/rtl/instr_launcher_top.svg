@@ -22,6 +22,6 @@
 <text x="530" y="435" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">instr_out_valid_o</text>
 <polygon points="535,495 555,495 565,485 585,485 585,495 585,505 565,505 555,495 535,495"/>
 <text x="530" y="485" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">instr_out_ready_i</text>
-<text x="295" y="550" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">maverickOne_instr_launcher</text>
+<text x="295" y="550" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">instr_launcher</text>
 </g>
 </svg>

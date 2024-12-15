@@ -1,13 +1,13 @@
-# maverickOne_instr_launcher (module)
+# instr_launcher (module)
 
 ### Author : Foez Ahmed (https://github.com/foez-ahmed)
 
 ## TOP IO
-<img src="./maverickOne_instr_launcher_top.svg">
+<img src="./instr_launcher_top.svg">
 
 ## Description
 
-The maverickOne_instr_launcher module manages the instructions heading for execution. It temporarily store
+The instr_launcher module manages the instructions heading for execution. It temporarily store
 instructions, checks register availability, and launches them for execution avoiding hazzards.
 
 <br>**This file is part of DSInnovators:maverickOne**
@@ -15,7 +15,7 @@ instructions, checks register availability, and launches them for execution avoi
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 
-<img src="./maverickOne_instr_launcher_des.svg">
+<img src="./instr_launcher_des.svg">
 
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|

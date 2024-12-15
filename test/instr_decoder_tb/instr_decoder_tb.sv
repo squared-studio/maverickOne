@@ -8,7 +8,7 @@ Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-module maverickOne_instr_decoder_tb;
+module instr_decoder_tb;
 
   //`define ENABLE_DUMPFILE
 
@@ -711,7 +711,7 @@ module maverickOne_instr_decoder_tb;
   //-RTLS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  maverickOne_instr_decoder u_dut (
+  instr_decoder u_dut (
       .pc_i,
       .code_i,
       .cmd_o
@@ -721,7 +721,7 @@ module maverickOne_instr_decoder_tb;
   //-METHODS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  `define MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(__FIELD__)                                       \
+  `define INSTR_DECODER_TB_MON_CHECK(__FIELD__)                                       \
     if (exp_cmd_o.``__FIELD__`` !== cmd_o.``__FIELD__``) begin                                    \
       $display(`"``__FIELD__``: Exp:0x%h Got:0x%h`",                                              \
         exp_cmd_o.``__FIELD__``, cmd_o.``__FIELD__``);                                            \
@@ -773,15 +773,15 @@ module maverickOne_instr_decoder_tb;
             end
           end
           $display();
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(pc)
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(func)
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(rd)
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(rs1)
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(rs2)
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(rs3)
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(blocking)
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(imm)
-          `MAVERICKONE_INSTR_DECODER_TB_MON_CHECK(reg_req)
+          `INSTR_DECODER_TB_MON_CHECK(pc)
+          `INSTR_DECODER_TB_MON_CHECK(func)
+          `INSTR_DECODER_TB_MON_CHECK(rd)
+          `INSTR_DECODER_TB_MON_CHECK(rs1)
+          `INSTR_DECODER_TB_MON_CHECK(rs2)
+          `INSTR_DECODER_TB_MON_CHECK(rs3)
+          `INSTR_DECODER_TB_MON_CHECK(blocking)
+          `INSTR_DECODER_TB_MON_CHECK(imm)
+          `INSTR_DECODER_TB_MON_CHECK(reg_req)
           $display();
           result_print(0, "Test Failed due to fault");
           $finish;

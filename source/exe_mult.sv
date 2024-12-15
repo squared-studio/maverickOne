@@ -9,7 +9,7 @@ See LICENSE file in the project root for full license information
 
 `include "maverickOne_pkg.sv"
 
-module maverickOne_exe_mult #(
+module exe_mult #(
     localparam int XLEN = maverickOne_pkg::XLEN
 ) (
     input logic clk_i,

@@ -30,6 +30,6 @@
 <text x="730" y="635" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">rs2_data_o</text>
 <polygon points="735,695 755,695 755,685 775,685 785,695 775,705 755,705 755,695 735,695"/>
 <text x="730" y="685" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">rs3_data_o</text>
-<text x="395" y="750" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">maverickOne_regfile</text>
+<text x="395" y="750" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">regfile</text>
 </g>
 </svg>

@@ -7,7 +7,7 @@ Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
 
-module maverickOne_regfile_tb;
+module regfile_tb;
 
   //`define ENABLE_DUMPFILE
 
@@ -74,7 +74,7 @@ module maverickOne_regfile_tb;
   //-RTLS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  maverickOne_regfile #() u_regfile (
+  regfile #() u_regfile (
       .arst_ni,
       .clk_i,
       .wr_unlock_addr_i,
