@@ -2,6 +2,7 @@
 [`branch_target_buffer`](branch_target_buffer.md)
 [`constant_compare`](constant_compare.md)
 [`decoder_no_valid`](decoder_no_valid.md)
+[`demux`](demux.md)
 [`encoder`](encoder.md)
 [`exe_m64_mult`](exe_m64_mult.md)
 [`fixed_priority_arbiter`](fixed_priority_arbiter.md)
