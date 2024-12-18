@@ -65,10 +65,10 @@ module regfile_tb;
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   data_t          ref_mem          [NUM_REGS];
-  num_reg_t       lock_profile;
-  logic           lock_at_reset;
-  logic           lock_violation_n;
-  logic     [2:0] read_error_n;
+  num_reg_t       tb_locks;
+  num_reg_t       tb_locks_2;
+  logic           lock_violation;
+  logic     [3:1] read_error;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -96,15 +96,16 @@ module regfile_tb;
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   task static apply_reset();
-    lock_at_reset = 1;
     #100ns;
+    result_print(locks_o === 'x, "Locks not defined before reset");
     arst_ni <= 0;
-    #100ns;
-    if (~(&(locks_o))) lock_at_reset = 0;
     foreach (ref_mem[i]) ref_mem[i] <= '0;
-    lock_profile <= '0;
+    tb_locks <= '0;
+    #100ns;
+    result_print(locks_o === '1, "Locks active during reset");
     arst_ni <= 1;
     #100ns;
+    result_print(locks_o === '0, "Locks cleared after reset");
   endtask
 
   task automatic start_random_drive();
@@ -112,10 +113,10 @@ module regfile_tb;
       begin
         forever begin
           @(posedge clk_i);
-          wr_lock_en_i <= $urandom_range(0, 99) < 50;
+          wr_lock_en_i <= $urandom;
           wr_lock_addr_i <= $urandom;
 
-          wr_unlock_en_i <= $urandom_range(0, 99) < 50;
+          wr_unlock_en_i <= $urandom;
           wr_unlock_addr_i <= $urandom;
           wr_unlock_data_i <= $urandom;
 
@@ -127,43 +128,42 @@ module regfile_tb;
     join_none
   endtask  // random drive task
 
+  `define REGFILE_TB_RS_READ_CHECK(__IDX__)                                                       \
+    if (tb_locks[rs``__IDX__``_addr_i]                                                            \
+     && (rs``__IDX__``_data_o !== wr_unlock_data_i)) begin                                        \
+      read_error[``__IDX__``] = '1;                                                               \
+      $display(`"\033[1;31m[%0t] EXPECTED BYPASS\033[0m\nWR  : 0x%x\nRS``__IDX__`` : 0x%x\n`",    \
+                $realtime, wr_unlock_data_i, rs``__IDX__``_data_o);                               \
+    end else if (tb_locks[rs``__IDX__``_addr_i] == 0                                              \
+          && (rs``__IDX__``_data_o !== ref_mem[rs``__IDX__``_addr_i])) begin                      \
+      read_error[``__IDX__``] = '1;                                                               \
+      $display(`"\033[1;31m[%0t] MEM_READ\033[0m\nTB  : 0x%x\nRS``__IDX__`` : 0x%x\n`",           \
+                $realtime, ref_mem[rs``__IDX__``_addr_i], rs``__IDX__``_data_o);                  \
+    end                                                                                           \
+
+
   task automatic start_in_out_monitor();
-    lock_violation_n <= '1;
-    read_error_n <= '1;
+    lock_violation <= '0;
+    read_error     <= '0;
     fork
       begin
         forever begin
           @(posedge clk_i);
-          if (arst_ni) begin
-            if (wr_unlock_en_i && (wr_unlock_addr_i !== 0)) begin
-              ref_mem[wr_unlock_addr_i] <= wr_unlock_data_i;
-              lock_profile[wr_unlock_addr_i] <= ~wr_unlock_en_i;
-            end
-
-            if (wr_lock_en_i && (wr_lock_addr_i !== 0)) begin
-              lock_profile[wr_lock_addr_i] <= wr_lock_en_i;
-            end
-
-            if (locks_o !== lock_profile) begin
-              lock_violation_n = 'b0;
-            end
+          tb_locks_2 = tb_locks;
+          if (wr_unlock_en_i) tb_locks_2[wr_unlock_addr_i] = '0;
+          if (tb_locks_2 !== locks_o) begin
+            lock_violation = '1;
+            $display("\033[1;31m[%0t] LOCKS VIOLATION\033[0m\nTB  : 0b%b\nRTL : 0b%b\n", $realtime,
+                     tb_locks_2, locks_o);
           end
-
-          if (rs1_addr_i !== 'x) begin
-            if (rs1_data_o !== ref_mem[rs1_addr_i]) begin
-              read_error_n[0] = 'b0;
-            end
+          `REGFILE_TB_RS_READ_CHECK(1)
+          `REGFILE_TB_RS_READ_CHECK(2)
+          `REGFILE_TB_RS_READ_CHECK(3)
+          if (wr_unlock_en_i && wr_unlock_addr_i != 0) begin
+            ref_mem[wr_unlock_addr_i]  = wr_unlock_data_i;
+            tb_locks[wr_unlock_addr_i] = '0;
           end
-          if (rs2_addr_i !== 'x) begin
-            if (rs2_data_o !== ref_mem[rs2_addr_i]) begin
-              read_error_n[1] = 'b0;
-            end
-          end
-          if (rs3_addr_i !== 'x) begin
-            if (rs3_data_o !== ref_mem[rs3_addr_i]) begin
-              read_error_n[2] = 'b0;
-            end
-          end
+          if (wr_lock_en_i && (wr_lock_addr_i != 0)) tb_locks[wr_lock_addr_i] = '1;
         end
       end
     join_none
@@ -181,12 +181,11 @@ module regfile_tb;
   end
 
   initial begin
-    repeat (1000001) @(posedge clk_i);
-    result_print(lock_at_reset, "Reset Lockdown Check");
-    result_print(lock_violation_n, "Lock Violation Check");
-    result_print(read_error_n[0], "Rs1 Read Error Check");
-    result_print(read_error_n[1], "Rs2 Read Error Check");
-    result_print(read_error_n[2], "Rs3 Read Error Check");
+    repeat (1000000) @(posedge clk_i);
+    result_print(!lock_violation, "Lock Violation Check");
+    result_print(!read_error[1], "Rs1 Read Error Check");
+    result_print(!read_error[2], "Rs2 Read Error Check");
+    result_print(!read_error[3], "Rs3 Read Error Check");
     $finish;
   end
 

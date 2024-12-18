@@ -54,9 +54,9 @@ module regfile #(
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Read data from the specified source registers
-  always_comb rs1_data_o = r_locks[rs1_addr_i] ? regfile[rs1_addr_i] : wr_unlock_data_i;
-  always_comb rs2_data_o = r_locks[rs2_addr_i] ? regfile[rs2_addr_i] : wr_unlock_data_i;
-  always_comb rs3_data_o = r_locks[rs3_addr_i] ? regfile[rs3_addr_i] : wr_unlock_data_i;
+  always_comb rs1_data_o = r_locks[rs1_addr_i] ? wr_unlock_data_i : regfile[rs1_addr_i];
+  always_comb rs2_data_o = r_locks[rs2_addr_i] ? wr_unlock_data_i : regfile[rs2_addr_i];
+  always_comb rs3_data_o = r_locks[rs3_addr_i] ? wr_unlock_data_i : regfile[rs3_addr_i];
 
   // Check if the unlock address is non-zero
   always_comb wr_unlock_addr_not_zero = |wr_unlock_addr_i;
