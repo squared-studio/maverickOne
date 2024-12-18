@@ -13,6 +13,8 @@ Write a markdown documentation for this systemverilog module:
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 
+<img src="./branch_target_buffer_des.svg">
+
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|
 |-|-|-|-|-|

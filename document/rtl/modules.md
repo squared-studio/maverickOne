@@ -3,7 +3,7 @@
 [`constant_compare`](constant_compare.md)
 [`decoder_no_valid`](decoder_no_valid.md)
 [`encoder`](encoder.md)
-[`exe_mult`](exe_mult.md)
+[`exe_m64_mult`](exe_m64_mult.md)
 [`fixed_priority_arbiter`](fixed_priority_arbiter.md)
 [`instr_decoder`](instr_decoder.md)
 [`instr_launcher`](instr_launcher.md)
