@@ -51,6 +51,7 @@ module branch_target_buffer #(
   logic [$clog2(NUMREG)-1:0] write_row_ind;
 
   logic empty_row_found;
+  logic found;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-ASSIGNMENTS
@@ -60,12 +61,14 @@ module branch_target_buffer #(
     always_comb pc_caddr_match[i] = buffer_valid[i] & (pc_i == buffer_current[i]);
   end
 
+  assign found_o = found | table_update_o;
+
   priority_encoder #(
       .NUM_WIRE(NUMREG)
   ) pc_caddr_match_find (
       .wire_in(pc_caddr_match),
       .index_o(match_row_ind),
-      .index_o(found_o)
+      .index_o(found)
   );
 
   priority_encoder #(
@@ -76,11 +79,11 @@ module branch_target_buffer #(
       .index_o(empty_row_found)
   );
 
-  always_comb next_pc_o = {buffer_next[match_row_ind], 2'b00};  // Should I handle here on in IF?
+  always_comb next_pc_o = table_update_o ? next_addr_i : {buffer_next[match_row_ind], 2'b00};
 
   always_comb naddr_neq_caddr_plus4 = (current_addr_i + 4 != next_addr_i);
 
-  always_comb table_update_o = is_jump_i & (naddr_neq_caddr_plus4 ^ found_o);
+  always_comb table_update_o = is_jump_i & (naddr_neq_caddr_plus4 ^ found);
 
   always_comb write_row_ind = naddr_neq_caddr_plus4 ? empty_row_ind : match_row_ind;
 
