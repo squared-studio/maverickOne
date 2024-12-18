@@ -253,6 +253,31 @@ module exe_m64_mult #(
 
   // TODO
 
+  logic [3:0][127:0] res128;
+  logic [127:0] res_final;
+
+  always_comb begin
+    for (int i = 0; i < 4; i++) begin
+      res128[i] = res79_q1[i];
+    end
+  end
+
+  always_comb begin
+    res_final = res128[0] + res128[1] + res128[2] + res128[3];
+  end
+
+  pipeline #( // TODO
+      .DW($bits({rd_q1, res_final}))
+  ) u_q2 (
+      .arst_ni, .clk_i, .clear_i('0),
+
+      .data_in_i({rd_q1, res_final}),
+      .data_in_valid_i(q1_q2_valid), .data_in_ready_o(q1_q2_ready),
+
+      .data_out_o({wr_addr_o, wr_data_o}),
+      .data_out_valid_o(valid_o), .data_out_ready_i(ready_i)
+  );
+
 `ifdef SIMULATION
   initial begin
     if (64 != 64) begin
