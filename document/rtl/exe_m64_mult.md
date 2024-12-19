@@ -7,7 +7,13 @@
 
 ## Description
 
-Write a markdown documentation for this systemverilog module:
+This module implements a 64-bit multiplier with support for various multiplication operations
+including:
+- **MUL:** Signed multiplication
+- **MULH:** Signed high multiplication
+- **MULHSU:** Signed-unsigned high multiplication
+- **MULHU:** Unsigned high multiplication
+- **MULW:** Word multiplication
 <br>**This file is part of DSInnovators:maverickOne**
 <br>**Copyright (c) 2024 DSInnovators**
 <br>**Licensed under the MIT License**
@@ -18,6 +24,8 @@ Write a markdown documentation for this systemverilog module:
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|
 |-|-|-|-|-|
+|BYPASS_Q0|bit||0||
+|BYPASS_Q1|bit||0||
 
 ## Ports
 |Name|Direction|Type|Dimension|Description|
@@ -35,7 +43,7 @@ Write a markdown documentation for this systemverilog module:
 |valid_i|input|logic|||
 |ready_o|output|logic|||
 |wr_data_o|output|logic [63:0]|||
-|wr_sig_ext_o|output|logic [ 1:0]|||
+|wr_size_o|output|logic [ 1:0]|||
 |wr_addr_o|output|logic [ 5:0]|||
 |valid_o|output|logic|||
 |ready_i|input|logic|||

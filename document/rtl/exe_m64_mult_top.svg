@@ -29,7 +29,7 @@
 <polygon points="735,495 755,495 755,485 775,485 785,495 775,505 755,505 755,495 735,495"/>
 <text x="730" y="485" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">wr_data_o</text>
 <polygon points="735,545 755,545 755,535 775,535 785,545 775,555 755,555 755,545 735,545"/>
-<text x="730" y="535" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">wr_sig_ext_o</text>
+<text x="730" y="535" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">wr_size_o</text>
 <polygon points="735,595 755,595 755,585 775,585 785,595 775,605 755,605 755,595 735,595"/>
 <text x="730" y="585" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">wr_addr_o</text>
 <polygon points="735,645 755,645 755,635 775,635 785,645 775,655 755,655 755,645 735,645"/>

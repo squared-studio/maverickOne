@@ -1,5 +1,11 @@
 /*
-Write a markdown documentation for this systemverilog module:
+This module implements a 64-bit multiplier with support for various multiplication operations
+including:
+- **MUL:** Signed multiplication
+- **MULH:** Signed high multiplication
+- **MULHSU:** Signed-unsigned high multiplication
+- **MULHU:** Unsigned high multiplication
+- **MULW:** Word multiplication
 Author : Foez Ahmed (https://github.com/foez-ahmed)
 This file is part of DSInnovators:maverickOne
 Copyright (c) 2024 DSInnovators
@@ -10,6 +16,8 @@ See LICENSE file in the project root for full license information
 `include "maverickOne_pkg.sv"
 
 module exe_m64_mult #(
+  parameter bit BYPASS_Q0 = 0,
+  parameter bit BYPASS_Q1 = 0
 ) (
     input logic clk_i,
     input logic arst_ni,
@@ -26,7 +34,7 @@ module exe_m64_mult #(
     output logic        ready_o,
 
     output logic [63:0] wr_data_o,
-    output logic [ 1:0] wr_sig_ext_o,
+    output logic [ 1:0] wr_size_o,
     output logic [ 5:0] wr_addr_o,
     output logic        valid_o,
     input  logic        ready_i
@@ -75,17 +83,17 @@ module exe_m64_mult #(
   assign ready_o = this_module & q0_ready;
 
   ////////////////////////////////////////////////
-  // MULTIPLIER, MULTIPLICAND, SIGN, WORD, RD
+  // MULTIPLIER, MULTIPLICAND, NEGATIVE, WORD, RD
   ////////////////////////////////////////////////
 
   logic [63:0] multiplier;
   logic [63:0] multiplicand;
-  logic [ 1:0] sign;  // {signed, negative}
+  logic        negative;
 
   always_comb begin
     multiplier   = rs2_i;
     multiplicand = rs1_i;
-    sign         = '0;
+    negative     = '0;
 
     if (MULW_i) begin
       multiplier   = {{32{rs2_i[31]}}, rs2_i[31:0]};
@@ -93,14 +101,14 @@ module exe_m64_mult #(
     end
 
     if (MUL_i | MULH_i | MULW_i) begin
-      sign[0] = multiplier[63] ^ multiplicand[63];
+      negative = multiplier[63] ^ multiplicand[63];
       if (multiplier[63]) multiplier = ~multiplier + 1;
       multiplier[63] = '0;
       if (multiplicand[63]) multiplicand = ~multiplicand + 1;
       multiplicand[63] = '0;
 
     end else if (MULHSU_i) begin
-      sign[0] = multiplicand[63];
+      negative = multiplicand[63];
       if (multiplicand[63]) multiplicand = ~multiplicand + 1;
       multiplicand[63] = '0;
 
@@ -135,7 +143,7 @@ module exe_m64_mult #(
   logic [5:0]  rd_q0;
   logic        word_q0;
   logic        upper_q0;
-  logic [ 1:0] sign_q0;
+  logic        negative_q0;
   logic [63:0] res_0001_q0;
   logic [64:0] res_0011_q0;
   logic [65:0] res_0111_q0;
@@ -146,26 +154,44 @@ module exe_m64_mult #(
   logic [66:0] res_1111_q0;
   logic [63:0] multiplier_q0;
 
-  pipeline #(
-      .DW($bits({rd_q0, word_q0, upper_q0, sign_q0,
-                 res_0001_q0, res_0011_q0, res_0111_q0, res_0101_q0,
-                 res_1001_q0, res_1011_q0, res_1101_q0, res_1111_q0,
-                 multiplier_q0}))
-  ) u_q0 (
-      .arst_ni, .clk_i, .clear_i('0),
+  if (BYPASS_Q0) begin : g_bypass_q0
+    assign rd_q0 = rd_i;
+    assign word_q0 = word;
+    assign upper_q0 = upper;
+    assign negative_q0 = negative;
+    assign res_0001_q0 = res_0001;
+    assign res_0011_q0 = res_0011;
+    assign res_0111_q0 = res_0111;
+    assign res_0101_q0 = res_0101;
+    assign res_1001_q0 = res_1001;
+    assign res_1011_q0 = res_1011;
+    assign res_1101_q0 = res_1101;
+    assign res_1111_q0 = res_1111;
+    assign multiplier_q0 = multiplier;
+    assign q0_q1_valid = q0_valid;
+    assign q0_ready = q0_q1_ready;
+  end else begin : g_pipeline_q0
+    pipeline #(
+        .DW($bits({rd_q0, word_q0, upper_q0, negative_q0,
+                  res_0001_q0, res_0011_q0, res_0111_q0, res_0101_q0,
+                  res_1001_q0, res_1011_q0, res_1101_q0, res_1111_q0,
+                  multiplier_q0}))
+    ) u_q0 (
+        .arst_ni, .clk_i, .clear_i('0),
 
-      .data_in_i({rd_i, word, upper, sign,
-                  res_0001, res_0011, res_0111, res_0101,
-                  res_1001, res_1011, res_1101, res_1111,
-                  multiplier}),
-      .data_in_valid_i(q0_valid), .data_in_ready_o(q0_ready),
+        .data_in_i({rd_i, word, upper, negative,
+                    res_0001, res_0011, res_0111, res_0101,
+                    res_1001, res_1011, res_1101, res_1111,
+                    multiplier}),
+        .data_in_valid_i(q0_valid), .data_in_ready_o(q0_ready),
 
-      .data_out_o({rd_q0, word_q0, upper_q0, sign_q0,
-                   res_0001_q0, res_0011_q0, res_0111_q0, res_0101_q0,
-                   res_1001_q0, res_1011_q0, res_1101_q0, res_1111_q0,
-                   multiplier_q0}),
-      .data_out_valid_o(q0_q1_valid), .data_out_ready_i(q0_q1_ready)
-  );
+        .data_out_o({rd_q0, word_q0, upper_q0, negative_q0,
+                    res_0001_q0, res_0011_q0, res_0111_q0, res_0101_q0,
+                    res_1001_q0, res_1011_q0, res_1101_q0, res_1111_q0,
+                    multiplier_q0}),
+        .data_out_valid_o(q0_q1_valid), .data_out_ready_i(q0_q1_ready)
+    );
+  end
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //        _            _ _                      _
@@ -211,7 +237,7 @@ module exe_m64_mult #(
 
   always_comb begin
     for (int i = 0; i < 16; i++) begin
-      ext79['b0000] = xbar_out['b0000];
+      ext79[i] = xbar_out[i];
     end
   end
 
@@ -226,20 +252,30 @@ module exe_m64_mult #(
   logic [5:0]  rd_q1;
   logic        word_q1;
   logic        upper_q1;
-  logic [ 1:0] sign_q1;
+  logic [ 1:0] negative_q1;
   logic [3:0][78:0] res79_q1;
 
-  pipeline #(
-      .DW($bits({rd_q1, word_q1, upper_q1, sign_q1, res79_q1}))
-  ) u_q1 (
-      .arst_ni, .clk_i, .clear_i('0),
+  if (BYPASS_Q1) begin : g_bypass_q1
+    assign rd_q1        = rd_q0;
+    assign word_q1      = word_q0;
+    assign upper_q1     = upper_q0;
+    assign negative_q1  = negative_q0;
+    assign res79_q1     = res79;
+    assign q1_q2_valid  = q0_q1_valid;
+    assign q0_q1_ready  = q1_q2_ready;
+  end else begin : g_pipeline_q1
+    pipeline #(
+        .DW($bits({rd_q1, word_q1, upper_q1, negative_q1, res79_q1}))
+    ) u_q1 (
+        .arst_ni, .clk_i, .clear_i('0),
 
-      .data_in_i({rd_q0, word_q0, upper_q0, sign_q0, res79}),
-      .data_in_valid_i(q0_q1_valid), .data_in_ready_o(q0_q1_ready),
+        .data_in_i({rd_q0, word_q0, upper_q0, negative_q0, res79}),
+        .data_in_valid_i(q0_q1_valid), .data_in_ready_o(q0_q1_ready),
 
-      .data_out_o({rd_q1, word_q1, upper_q1, sign_q1, res79_q1}),
-      .data_out_valid_o(q1_q2_valid), .data_out_ready_i(q1_q2_ready)
-  );
+        .data_out_o({rd_q1, word_q1, upper_q1, negative_q1, res79_q1}),
+        .data_out_valid_o(q1_q2_valid), .data_out_ready_i(q1_q2_ready)
+    );
+  end
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //        _            _ _                      ____
@@ -251,10 +287,10 @@ module exe_m64_mult #(
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  // TODO
-
   logic [3:0][127:0] res128;
-  logic [127:0] res_final;
+  logic [127:0] final_sum;
+  logic [63:0] semi_final_res_64;
+  logic [63:0] final_res;
 
   always_comb begin
     for (int i = 0; i < 4; i++) begin
@@ -262,26 +298,32 @@ module exe_m64_mult #(
     end
   end
 
-  always_comb begin
-    res_final = res128[0] + res128[1] + res128[2] + res128[3];
-  end
+  always_comb final_sum = res128[0] + res128[1] + res128[2] + res128[3];
 
-  pipeline #( // TODO
-      .DW($bits({rd_q1, res_final}))
+  always_comb semi_final_res_64 = upper_q1 ? final_sum[127:64] : final_sum[63:0];
+
+  always_comb final_res = negative_q1 ? ~semi_final_res_64 + 1 : semi_final_res_64;
+
+  logic word_q2;
+
+  pipeline #(
+      .DW($bits({wr_data_o, word_q2, wr_addr_o}))
   ) u_q2 (
       .arst_ni, .clk_i, .clear_i('0),
 
-      .data_in_i({rd_q1, res_final}),
+      .data_in_i({final_res, word_q1, rd_q1}),
       .data_in_valid_i(q1_q2_valid), .data_in_ready_o(q1_q2_ready),
 
-      .data_out_o({wr_addr_o, wr_data_o}),
+      .data_out_o({wr_data_o, word_q2, wr_addr_o}),
       .data_out_valid_o(valid_o), .data_out_ready_i(ready_i)
   );
+
+  always_comb wr_size_o = word_q2 ? 2'b10 : 2'b11;
 
 `ifdef SIMULATION
   initial begin
     if (64 != 64) begin
-      $fatal("\033[1;33m%m Unsupported XLEN\033[0m");
+      $fatal(1, "\033[1;33m%m Unsupported XLEN\033[0m");
     end
   end
 `endif  // SIMULATION

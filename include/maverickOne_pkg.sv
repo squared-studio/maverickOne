@@ -231,6 +231,15 @@ package maverickOne_pkg;
 
   } decoded_instr_t;
 
+  typedef struct packed {
+    // Register destination address
+    logic [$clog2(NUM_REGS)-1:0] rd;
+    // Result of the operation
+    logic [XLEN-1:0]             result;
+    // Indicates if the operation is word-sized
+    logic                        word;
+  } ext_arb_req_t;
+
 endpackage
 
 `endif
