@@ -24,19 +24,19 @@ module constant_compare #(
   //-LOCALPARAMS GENERATED
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  typedef bit [31:0] int_t;  // Type definition for a 32-bit integer
+  typedef bit [31:0] bit32_t;  // Type definition for a 32-bit integer
 
   // Function to count the number of ones in CMP_ENABLES
-  function automatic int_t count_ones();
-    int_t count = 0;
+  function automatic bit32_t count_ones();
+    bit32_t count = 0;
     // Increment count for each bit that is 1
     foreach (CMP_ENABLES[i]) if (CMP_ENABLES[i]) count++;
     return count;
   endfunction
 
-  localparam int_t NumCompares = count_ones();  // Number of comparisons to perform
+  localparam bit32_t NumCompares = count_ones();  // Number of comparisons to perform
 
-  typedef int_t [NumCompares-1:0] index_t;  // Type definition for an index array
+  typedef bit32_t [NumCompares-1:0] index_t;  // Type definition for an index array
 
   // Function to generate an index array based on CMP_ENABLES
   function automatic index_t gen_index();

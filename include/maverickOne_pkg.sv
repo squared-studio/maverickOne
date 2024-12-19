@@ -27,6 +27,8 @@ package maverickOne_pkg;
 
   parameter int NUM_REGS = NUM_GPR + NUM_FPR;
 
+  parameter int NUM_BTBL = 32;
+
   ////////////////////////////////////////////////
   // instr_launcher
   ////////////////////////////////////////////////
