@@ -249,10 +249,10 @@ module exe_m64_mult #(
     end
   end
 
-  logic [5:0]  rd_q1;
-  logic        word_q1;
-  logic        upper_q1;
-  logic [ 1:0] negative_q1;
+  logic [5:0]       rd_q1;
+  logic             word_q1;
+  logic             upper_q1;
+  logic             negative_q1;
   logic [3:0][78:0] res79_q1;
 
   if (BYPASS_Q1) begin : g_bypass_q1

@@ -205,10 +205,10 @@ sta: generate_flist
 	@echo "synth_design -top $(RTL) -part xc7z020clg484-1" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
 	@echo "report_methodology -file ../TIMING_REPORTS_$(RTL)/methodology_report.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
 	@echo "report_timing_summary -file ../TIMING_REPORTS_$(RTL)/timing_summary.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
-	@echo "report_timing -delay_type max -path_type full -file ../TIMING_REPORTS_$(RTL)/detailed_timing_max.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
-	@echo "report_timing -delay_type min -path_type full -file ../TIMING_REPORTS_$(RTL)/detailed_timing_min.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
+	@echo "report_timing -delay_type max -path_type full -max_paths 100 -file ../TIMING_REPORTS_$(RTL)/detailed_timing_max.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
+	@echo "report_timing -delay_type min -path_type full -max_paths 100 -file ../TIMING_REPORTS_$(RTL)/detailed_timing_min.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
 	@echo "report_clock_interaction -file ../TIMING_REPORTS_$(RTL)/clock_interaction.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
-	@echo "report_timing -delay_type max -slack_lesser_than 0 -file ../TIMING_REPORTS_$(RTL)/failing_paths.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
+	@echo "report_timing -delay_type max -slack_lesser_than 0 -max_paths 100 -file ../TIMING_REPORTS_$(RTL)/failing_paths.rpt" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
 	@echo "exit" >> TIMING_REPORTS_$(RTL)/$(RTL).tcl
 	@cd build; vivado -mode batch -source ../TIMING_REPORTS_$(RTL)/$(RTL).tcl
 	@make -s soft_clean
