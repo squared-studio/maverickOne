@@ -16,8 +16,6 @@ See LICENSE file in the project root for full license information
 `include "maverickOne_pkg.sv"
 
 module exe_m64_mult #(
-  parameter bit BYPASS_Q0 = 0,
-  parameter bit BYPASS_Q1 = 0
 ) (
     input logic clk_i,
     input logic arst_ni,
@@ -154,44 +152,26 @@ module exe_m64_mult #(
   logic [66:0] res_1111_q0;
   logic [63:0] multiplier_q0;
 
-  if (BYPASS_Q0) begin : g_bypass_q0
-    assign rd_q0 = rd_i;
-    assign word_q0 = word;
-    assign upper_q0 = upper;
-    assign negative_q0 = negative;
-    assign res_0001_q0 = res_0001;
-    assign res_0011_q0 = res_0011;
-    assign res_0111_q0 = res_0111;
-    assign res_0101_q0 = res_0101;
-    assign res_1001_q0 = res_1001;
-    assign res_1011_q0 = res_1011;
-    assign res_1101_q0 = res_1101;
-    assign res_1111_q0 = res_1111;
-    assign multiplier_q0 = multiplier;
-    assign q0_q1_valid = q0_valid;
-    assign q0_ready = q0_q1_ready;
-  end else begin : g_pipeline_q0
-    pipeline #(
-        .DW($bits({rd_q0, word_q0, upper_q0, negative_q0,
+  pipeline #(
+      .DW($bits({rd_q0, word_q0, upper_q0, negative_q0,
+                res_0001_q0, res_0011_q0, res_0111_q0, res_0101_q0,
+                res_1001_q0, res_1011_q0, res_1101_q0, res_1111_q0,
+                multiplier_q0}))
+  ) u_q0 (
+      .arst_ni, .clk_i, .clear_i('0),
+
+      .data_in_i({rd_i, word, upper, negative,
+                  res_0001, res_0011, res_0111, res_0101,
+                  res_1001, res_1011, res_1101, res_1111,
+                  multiplier}),
+      .data_in_valid_i(q0_valid), .data_in_ready_o(q0_ready),
+
+      .data_out_o({rd_q0, word_q0, upper_q0, negative_q0,
                   res_0001_q0, res_0011_q0, res_0111_q0, res_0101_q0,
                   res_1001_q0, res_1011_q0, res_1101_q0, res_1111_q0,
-                  multiplier_q0}))
-    ) u_q0 (
-        .arst_ni, .clk_i, .clear_i('0),
-
-        .data_in_i({rd_i, word, upper, negative,
-                    res_0001, res_0011, res_0111, res_0101,
-                    res_1001, res_1011, res_1101, res_1111,
-                    multiplier}),
-        .data_in_valid_i(q0_valid), .data_in_ready_o(q0_ready),
-
-        .data_out_o({rd_q0, word_q0, upper_q0, negative_q0,
-                    res_0001_q0, res_0011_q0, res_0111_q0, res_0101_q0,
-                    res_1001_q0, res_1011_q0, res_1101_q0, res_1111_q0,
-                    multiplier_q0}),
-        .data_out_valid_o(q0_q1_valid), .data_out_ready_i(q0_q1_ready)
-    );
-  end
+                  multiplier_q0}),
+      .data_out_valid_o(q0_q1_valid), .data_out_ready_i(q0_q1_ready)
+  );
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //        _            _ _                      _
@@ -255,27 +235,17 @@ module exe_m64_mult #(
   logic             negative_q1;
   logic [3:0][78:0] res79_q1;
 
-  if (BYPASS_Q1) begin : g_bypass_q1
-    assign rd_q1        = rd_q0;
-    assign word_q1      = word_q0;
-    assign upper_q1     = upper_q0;
-    assign negative_q1  = negative_q0;
-    assign res79_q1     = res79;
-    assign q1_q2_valid  = q0_q1_valid;
-    assign q0_q1_ready  = q1_q2_ready;
-  end else begin : g_pipeline_q1
-    pipeline #(
-        .DW($bits({rd_q1, word_q1, upper_q1, negative_q1, res79_q1}))
-    ) u_q1 (
-        .arst_ni, .clk_i, .clear_i('0),
+  pipeline #(
+      .DW($bits({rd_q1, word_q1, upper_q1, negative_q1, res79_q1}))
+  ) u_q1 (
+      .arst_ni, .clk_i, .clear_i('0),
 
-        .data_in_i({rd_q0, word_q0, upper_q0, negative_q0, res79}),
-        .data_in_valid_i(q0_q1_valid), .data_in_ready_o(q0_q1_ready),
+      .data_in_i({rd_q0, word_q0, upper_q0, negative_q0, res79}),
+      .data_in_valid_i(q0_q1_valid), .data_in_ready_o(q0_q1_ready),
 
-        .data_out_o({rd_q1, word_q1, upper_q1, negative_q1, res79_q1}),
-        .data_out_valid_o(q1_q2_valid), .data_out_ready_i(q1_q2_ready)
-    );
-  end
+      .data_out_o({rd_q1, word_q1, upper_q1, negative_q1, res79_q1}),
+      .data_out_valid_o(q1_q2_valid), .data_out_ready_i(q1_q2_ready)
+  );
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //        _            _ _                      ____

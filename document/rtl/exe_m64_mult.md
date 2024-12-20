@@ -24,8 +24,6 @@ including:
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|
 |-|-|-|-|-|
-|BYPASS_Q0|bit||0||
-|BYPASS_Q1|bit||0||
 
 ## Ports
 |Name|Direction|Type|Dimension|Description|
