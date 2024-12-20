@@ -16,4 +16,5 @@
 [`reg_gnt_ckr`](reg_gnt_ckr.md)
 [`rotating_xbar`](rotating_xbar.md)
 [`round_robin_arbiter`](round_robin_arbiter.md)
+[`shift_reg`](shift_reg.md)
 [`xbar`](xbar.md)
