@@ -44,6 +44,7 @@ module branch_target_buffer #(
   reduced_addr_t buffer_current[NUM_BTBL];
   reduced_addr_t buffer_next[NUM_BTBL];
   logic [NUM_BTBL-1:0] buffer_valid;
+  logic [$clog2(NUM_BTBL)-1:0] counter;
 
   ///////////////////////////////////////////////
   // WIRES
@@ -77,7 +78,9 @@ module branch_target_buffer #(
 
   always_comb table_update_o = is_jump_i & (naddr_neq_caddr_plus4 ^ found);
 
-  always_comb write_row_ind = naddr_neq_caddr_plus4 ? empty_row_ind : match_row_ind;
+  always_comb
+    write_row_ind = naddr_neq_caddr_plus4 ? (empty_row_found ? empty_row_ind : counter)
+                  : match_row_ind;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -135,13 +138,13 @@ module branch_target_buffer #(
     end
   end
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //-CHECKS
-  //////////////////////////////////////////////////////////////////////////////////////////////////
+  always_ff @(posedge clk_i or negedge arst_ni) begin
+    if (~arst_ni) begin
+      counter <= '0;
+    end else begin
+      if (~empty_row_found & is_jump_i) counter <= counter + 1;
+    end
+  end
 
-  // Assert that an empty row is found in the buffer on each clock cycle when reset is not active.
-  // If this assertion fails, it indicates that the buffer is full and no empty row is available.
-  assert property (@(posedge clk_i iff (arst_ni)) empty_row_found)
-  else $error("Did not find empty row");
 
 endmodule
