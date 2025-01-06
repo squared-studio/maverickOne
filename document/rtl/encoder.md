@@ -12,8 +12,8 @@ binary index (index_o) corresponding to the position of the active input wire. I
 to perform a hierarchical reduction of the input signals, ultimately determining the index of the
 active wire. This module is intended to work with one-hot encoded inputs and will produce incorrect
 results if multiple inputs are active simultaneously.
-<br>**This file is part of DSInnovators:maverickOne**
-Copyright (c) 2024 DSInnovators
+<br>**This file is part of squared-studio:maverickOne**
+<br>**Copyright (c) 2025 squared-studio**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

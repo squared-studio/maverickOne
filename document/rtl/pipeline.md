@@ -17,8 +17,8 @@ functionalities include:
 - Managing internal state with flags to indicate if the pipeline stage is full or ready
 
 This ensures efficient and controlled data processing within the pipeline.
-<br>**This file is part of DSInnovators:maverickOne**
-Copyright (c) 2024 DSInnovators
+<br>**This file is part of squared-studio:maverickOne**
+<br>**Copyright (c) 2025 squared-studio**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

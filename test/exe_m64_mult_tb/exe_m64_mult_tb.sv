@@ -1,8 +1,8 @@
 /*
 Description
 Author : Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:maverickOne
-Copyright (c) 2024 DSInnovators
+This file is part of squared-studio:maverickOne
+Copyright (c) 2025 squared-studio
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
@@ -137,13 +137,13 @@ module exe_m64_mult_tb;
             MULHU_i <= '0;
             MULW_i <= '0;
           end
-          // 1: begin // TODO FIX
-          //   MUL_i <= '0;
-          //   MULH_i <= '0;
-          //   MULHSU_i <= '0;
-          //   MULHU_i <= '1;
-          //   MULW_i <= '0;
-          // end
+          1: begin
+            MUL_i <= '0;
+            MULH_i <= '0;
+            MULHSU_i <= '0;
+            MULHU_i <= '1;
+            MULW_i <= '0;
+          end
           1: begin
             MUL_i <= '0;
             MULH_i <= '0;
@@ -275,10 +275,10 @@ module exe_m64_mult_tb;
         repeat (10000) @(e_mulhsu);
         repeat (100) @(posedge clk_i);
       end
-      // begin // TODO FIX
-      //   repeat (10000) @(e_mulhu);
-      //   repeat (100) @(posedge clk_i);
-      // end
+      begin
+        repeat (10000) @(e_mulhu);
+        repeat (100) @(posedge clk_i);
+      end
       begin
         repeat (10000) @(e_mulw);
         repeat (100) @(posedge clk_i);

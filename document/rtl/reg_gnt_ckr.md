@@ -10,8 +10,8 @@
 It handles register locking and arbitration in a pipelined environment for a RISC-V core. The module
 ensures that necessary registers are locked/unlocked based on the current pipeline state and the
 requirements of instructions being executed.
-<br>**This file is part of DSInnovators:maverickOne**
-Copyright (c) 2024 DSInnovators
+<br>**This file is part of squared-studio:maverickOne**
+<br>**Copyright (c) 2025 squared-studio**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

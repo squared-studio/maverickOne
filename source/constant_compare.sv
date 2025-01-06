@@ -2,8 +2,8 @@
 This module generates simple AND gate for comparing a number with a constant expression. The output
 of match is also predefined for both true and false.
 Author : Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:maverickOne
-Copyright (c) 2024 DSInnovators
+This file is part of squared-studio:maverickOne
+Copyright (c) 2025 squared-studio
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */

@@ -25,8 +25,8 @@ This module is mean to decode instruction into the decoded_instr_t as mentioned 
 See the [ISA Manual](https://riscv.org/wp-content/uploads/2019/12/riscv-spec-20191213.pdf)'s Chapter
 24 (RV32/64G Instruction Set Listings) for the encoding.
 
-<br>**This file is part of DSInnovators:maverickOne**
-Copyright (c) 2024 DSInnovators
+<br>**This file is part of squared-studio:maverickOne**
+<br>**Copyright (c) 2025 squared-studio**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

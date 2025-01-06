@@ -7,8 +7,8 @@ including:
 - **MULHU:** Unsigned high multiplication
 - **MULW:** Word multiplication
 Author : Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:maverickOne
-Copyright (c) 2024 DSInnovators
+This file is part of squared-studio:maverickOne
+Copyright (c) 2025 squared-studio
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
@@ -110,14 +110,14 @@ module exe_m64_mult #(
   logic word;
   always_comb word = MULW_i;
 
-  logic [63:0] res_0001;
-  logic [64:0] res_0011;
-  logic [65:0] res_0111;
-  logic [65:0] res_0101;
-  logic [66:0] res_1001;
-  logic [66:0] res_1011;
-  logic [66:0] res_1101;
-  logic [66:0] res_1111;
+  logic [67:0] res_0001;
+  logic [67:0] res_0011;
+  logic [67:0] res_0111;
+  logic [67:0] res_0101;
+  logic [67:0] res_1001;
+  logic [67:0] res_1011;
+  logic [67:0] res_1101;
+  logic [67:0] res_1111;
 
   always_comb res_0001 = multiplicand;
   always_comb res_0011 = {res_0001, 1'b0} + res_0001;
@@ -132,14 +132,14 @@ module exe_m64_mult #(
   logic        word_q0;
   logic        upper_q0;
   logic        negative_q0;
-  logic [63:0] res_0001_q0;
-  logic [64:0] res_0011_q0;
-  logic [65:0] res_0111_q0;
-  logic [65:0] res_0101_q0;
-  logic [66:0] res_1001_q0;
-  logic [66:0] res_1011_q0;
-  logic [66:0] res_1101_q0;
-  logic [66:0] res_1111_q0;
+  logic [67:0] res_0001_q0;
+  logic [67:0] res_0011_q0;
+  logic [67:0] res_0111_q0;
+  logic [67:0] res_0101_q0;
+  logic [67:0] res_1001_q0;
+  logic [67:0] res_1011_q0;
+  logic [67:0] res_1101_q0;
+  logic [67:0] res_1111_q0;
   logic [63:0] multiplier_q0;
 
   pipeline #(
@@ -174,49 +174,49 @@ module exe_m64_mult #(
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Crossbar and extension logic
-  logic [15:0][66:0] ext67_res;
-  logic [15:0][66:0] xbar_out;
+  logic [15:0][67:0] ext68_res;
+  logic [15:0][67:0] xbar_out;
 
-  always_comb ext67_res['b0000] = '0;
-  always_comb ext67_res['b0001] = res_0001_q0;
-  always_comb ext67_res['b0010] = {res_0001_q0, 1'b0};
-  always_comb ext67_res['b0011] = res_0011_q0;
-  always_comb ext67_res['b0100] = {res_0001_q0, 2'b0};
-  always_comb ext67_res['b0101] = res_0101_q0;
-  always_comb ext67_res['b0110] = {res_0011_q0, 1'b0};
-  always_comb ext67_res['b0111] = res_0111_q0;
-  always_comb ext67_res['b1000] = {res_0001_q0, 3'b0};
-  always_comb ext67_res['b1001] = res_1001_q0;
-  always_comb ext67_res['b1010] = {res_0101_q0, 1'b0};
-  always_comb ext67_res['b1011] = res_1011_q0;
-  always_comb ext67_res['b1100] = {res_0011_q0, 2'b0};
-  always_comb ext67_res['b1101] = res_1101_q0;
-  always_comb ext67_res['b1110] = {res_0111_q0, 1'b0};
-  always_comb ext67_res['b1111] = res_1111_q0;
+  always_comb ext68_res['b0000] = '0;
+  always_comb ext68_res['b0001] = res_0001_q0;
+  always_comb ext68_res['b0010] = {res_0001_q0, 1'b0};
+  always_comb ext68_res['b0011] = res_0011_q0;
+  always_comb ext68_res['b0100] = {res_0001_q0, 2'b0};
+  always_comb ext68_res['b0101] = res_0101_q0;
+  always_comb ext68_res['b0110] = {res_0011_q0, 1'b0};
+  always_comb ext68_res['b0111] = res_0111_q0;
+  always_comb ext68_res['b1000] = {res_0001_q0, 3'b0};
+  always_comb ext68_res['b1001] = res_1001_q0;
+  always_comb ext68_res['b1010] = {res_0101_q0, 1'b0};
+  always_comb ext68_res['b1011] = res_1011_q0;
+  always_comb ext68_res['b1100] = {res_0011_q0, 2'b0};
+  always_comb ext68_res['b1101] = res_1101_q0;
+  always_comb ext68_res['b1110] = {res_0111_q0, 1'b0};
+  always_comb ext68_res['b1111] = res_1111_q0;
 
   xbar #(
       .NUM_INPUT (16),
       .NUM_OUTPUT(16),
-      .DATA_WIDTH(67)
+      .DATA_WIDTH(68)
   ) u_xbar (
-      .input_vector_i(ext67_res),
+      .input_vector_i(ext68_res),
       .output_vector_o(xbar_out),
       .select_vector_i(multiplier_q0)
   );
 
-  logic [15:0][78:0] ext79;
+  logic [15:0][79:0] ext80;
 
   always_comb begin
     for (int i = 0; i < 16; i++) begin
-      ext79[i] = xbar_out[i];
+      ext80[i] = xbar_out[i];
     end
   end
 
-  logic [3:0][78:0] res79;
+  logic [3:0][79:0] res80;
 
   always_comb begin
     for (int i = 0; i < 4; i++) begin
-      res79[i] =   {ext79[4*i+3],12'b0} + {ext79[4*i+2],8'b0} + {ext79[4*i+1],4'b0} + ext79[4*i];
+      res80[i] =   {ext80[4*i+3],12'b0} + {ext80[4*i+2],8'b0} + {ext80[4*i+1],4'b0} + ext80[4*i];
     end
   end
 
@@ -224,17 +224,17 @@ module exe_m64_mult #(
   logic             word_q1;
   logic             upper_q1;
   logic             negative_q1;
-  logic [3:0][78:0] res79_q1;
+  logic [3:0][79:0] res80_q1;
 
   pipeline #(
-      .DW($bits({rd_q1, word_q1, upper_q1, negative_q1, res79_q1}))
+      .DW($bits({rd_q1, word_q1, upper_q1, negative_q1, res80_q1}))
   ) u_q1 (
       .arst_ni, .clk_i, .clear_i('0),
 
-      .data_in_i({rd_q0, word_q0, upper_q0, negative_q0, res79}),
+      .data_in_i({rd_q0, word_q0, upper_q0, negative_q0, res80}),
       .data_in_valid_i(q0_q1_valid), .data_in_ready_o(q0_q1_ready),
 
-      .data_out_o({rd_q1, word_q1, upper_q1, negative_q1, res79_q1}),
+      .data_out_o({rd_q1, word_q1, upper_q1, negative_q1, res80_q1}),
       .data_out_valid_o(q1_q2_valid), .data_out_ready_i(q1_q2_ready)
   );
 
@@ -255,7 +255,7 @@ module exe_m64_mult #(
 
   always_comb begin
     for (int i = 0; i < 4; i++) begin
-      res128[i] = res79_q1[i];
+      res128[i] = res80_q1[i];
     end
   end
 

@@ -16,8 +16,8 @@ essential for efficient processor operation. Here's a detailed description of it
   address and size of the data.
 - **Interrupt Management**: Processes interrupt requests, determines the active interrupt, and
   acknowledges interrupts, ensuring timely and efficient interrupt handling.
-<br>**This file is part of DSInnovators:maverickOne**
-Copyright (c) 2024 DSInnovators
+<br>**This file is part of squared-studio:maverickOne**
+<br>**Copyright (c) 2025 squared-studio**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

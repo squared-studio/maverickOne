@@ -10,8 +10,8 @@
 The regfile module is designed to implement a register file with 64 registers, each 64 bits
 wide, for the RISC-V 64-bit architecture. This module supports locking and unlocking specific
 registers, making it suitable for operations that require controlled access to the registers.
-<br>**This file is part of DSInnovators:maverickOne**
-Copyright (c) 2024 DSInnovators
+<br>**This file is part of squared-studio:maverickOne**
+<br>**Copyright (c) 2025 squared-studio**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

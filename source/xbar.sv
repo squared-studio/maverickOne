@@ -5,8 +5,8 @@ input ports based on a selection vector. This module is useful in communication 
 designs where flexible and efficient data routing is required, ensuring that data from any input can
 be directed to any output based on specified criteria.
 Author : Foez Ahmed (https://github.com/foez-ahmed)
-This file is part of DSInnovators:maverickOne
-Copyright (c) 2024 DSInnovators
+This file is part of squared-studio:maverickOne
+Copyright (c) 2025 squared-studio
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */

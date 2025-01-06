@@ -87,7 +87,7 @@ test/$(TOP)/$(TOP).sv:
 	@cat submodules/sv-genesis/tb_model.sv \
 	| sed "s/Author : name (email)/Author : $(USER_NAME) ($(GIT_ID))/g" \
 	| sed "s/module tb_model;/module $(TOP);/g" \
-	| sed "s/squared-studio/DSInnovators/g" \
+	| sed "s/squared-studio/squared-studio/g" \
 	| sed "s/sv-genesis/maverickOne/g" \
 	> test/$(TOP)/$(TOP).sv
 
@@ -102,7 +102,7 @@ source/$(RTL).sv:
 	@cat submodules/sv-genesis/rtl_model.sv \
 	| sed "s/Author : name (email)/Author : $(USER_NAME) ($(GIT_ID))/g" \
 	| sed "s/module rtl_model/module $(RTL)/g" \
-	| sed "s/squared-studio/DSInnovators/g" \
+	| sed "s/squared-studio/squared-studio/g" \
 	| sed "s/sv-genesis/maverickOne/g" \
 	> source/$(RTL).sv
 
@@ -320,15 +320,12 @@ endef
 
 .PHONY: print_logo
 print_logo:
-	@echo "";
-	@echo "";
-	@echo -e "\033[1;34m  ____  ____ ___                             _      \033[0m\033[1;39m Since 2001 \033[0m";
-	@echo -e "\033[1;34m |  _ \/ ___|_ _|_ __  _ __   _____   ____ _| |_ ___  _ __ ___  \033[0m";
-	@echo -e "\033[1;34m | | | \___ \| || '_ \| '_ \ / _ \ \ / / _' | __/ _ \| '__/ __| \033[0m";
-	@echo -e "\033[1;34m | |_| |___) | || | | | | | | (_) \ V / (_| | || (_) | |  \__ \ \033[0m";
-	@echo -e "\033[1;34m |____/|____/___|_| |_|_| |_|\___/ \_/ \__,_|\__\___/|_|  |___/ \033[0m";
-	@echo -e "\033[1;39m ______________ Dynamic Solution Innovators Ltd. ______________ \033[0m";
-	@echo -e "";
+	@echo -e "\033[1;37m                                    _         _             _ _       \033[0m"
+	@echo -e "\033[1;37m ___  __ _ _   _  __ _ _ __ ___  __| |    ___| |_ _   _  __| (_) ___  \033[0m"
+	@echo -e "\033[1;37m/ __|/ _' | | | |/ _' | '__/ _ \/ _' |___/ __| __| | | |/ _' | |/ _ \ \033[0m"
+	@echo -e "\033[1;36m\__ \ (_| | |_| | (_| | | |  __/ (_| |___\__ \ |_| |_| | (_| | | (_) |\033[0m"
+	@echo -e "\033[1;36m|___/\__, |\__,_|\__,_|_|  \___|\__,_|   |___/\__|\__,_|\__,_|_|\___/ \033[0m"
+	@echo -e "\033[1;36m        |_|                                                2023-$(shell date +%Y)\033[0m\n"
 
 .PHONY: soft_clean
 soft_clean:
@@ -342,8 +339,8 @@ clean: soft_clean
 	@rm -rf $(shell find -name "temp_*")
 	@$(foreach word, $(shell cat .gitignore), rm -rf $(shell find $(shell realpath .) -name "$(word)");)
 
-LINE_1 := This file is part of DSInnovators:maverickOne
-LINE_2 := Copyright (c) $(shell date +%Y) DSInnovators
+LINE_1 := This file is part of squared-studio:maverickOne
+LINE_2 := Copyright (c) $(shell date +%Y) squared-studio
 LINE_3 := Licensed under the MIT License
 LINE_4 := See LICENSE file in the project root for full license information
 

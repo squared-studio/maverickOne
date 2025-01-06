@@ -12,8 +12,8 @@ the index of the highest priority active input wire. It achieves this by first u
 priority arbiter to generate a one-hot encoded signal of the highest priority request. This one-hot
 encoded signal is then passed to a simple encoder module, which converts it into a binary index
 representing the active input wire.
-<br>**This file is part of DSInnovators:maverickOne**
-Copyright (c) 2024 DSInnovators
+<br>**This file is part of squared-studio:maverickOne**
+<br>**Copyright (c) 2025 squared-studio**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

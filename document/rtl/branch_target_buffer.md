@@ -9,8 +9,8 @@
 
 The `branch_target_buffer` is designed to store and manage branch target addresses for a processor,
 helping to predict the next instruction address in case of a branch or jump.
-<br>**This file is part of DSInnovators:maverickOne**
-Copyright (c) 2024 DSInnovators
+<br>**This file is part of squared-studio:maverickOne**
+<br>**Copyright (c) 2025 squared-studio**
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

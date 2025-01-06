@@ -1,8 +1,8 @@
 /*
 Description
 Author : S. M. Tahmeed Reza (https://github.com/tahmeedKENJI)
-This file is part of DSInnovators:maverickOne
-Copyright (c) 2024 DSInnovators
+This file is part of squared-studio:maverickOne
+Copyright (c) 2025 squared-studio
 Licensed under the MIT License
 See LICENSE file in the project root for full license information
 */
