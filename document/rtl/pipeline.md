@@ -18,7 +18,7 @@ functionalities include:
 
 This ensures efficient and controlled data processing within the pipeline.
 <br>**This file is part of DSInnovators:maverickOne**
-<br>**Copyright (c) 2024 DSInnovators**
+Copyright (c) 2024 DSInnovators
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

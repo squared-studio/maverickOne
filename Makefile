@@ -76,7 +76,7 @@ submodules/sv-genesis/rtl_model.sv:
 	@git submodule update --init --recursive --depth 1
 
 .PHONY: tb
-tb: test/$(TOP)/$(TOP).sv test/$(TOP) submodules/sv-genesis/tb_model.sv test/$(TOP)/xsim_$(CONFIG)_cfg
+tb: test/$(TOP) test/$(TOP)/$(TOP).sv submodules/sv-genesis/tb_model.sv test/$(TOP)/xsim_$(CONFIG)_cfg
 	@code test/$(TOP)/$(TOP).sv
 
 test/$(TOP):
@@ -245,7 +245,6 @@ build/dump.vcd:
 .PHONY: wave
 wave: build/dump.vcd
 	@gtkwave build/dump.vcd
-
 
 #########################################################################################
 # VERIBLE

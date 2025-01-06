@@ -33,6 +33,7 @@ echo ""
 ################################################################################
 
 ci_simulate encoder_tb default
+ci_simulate exe_m64_mult_tb default # TODO FIX MULHU
 ci_simulate fixed_priority_arbiter_tb default
 ci_simulate instr_decoder_tb default
 ci_simulate instr_launcher_tb default

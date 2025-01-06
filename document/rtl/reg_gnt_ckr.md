@@ -11,7 +11,7 @@ It handles register locking and arbitration in a pipelined environment for a RIS
 ensures that necessary registers are locked/unlocked based on the current pipeline state and the
 requirements of instructions being executed.
 <br>**This file is part of DSInnovators:maverickOne**
-<br>**Copyright (c) 2024 DSInnovators**
+Copyright (c) 2024 DSInnovators
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 

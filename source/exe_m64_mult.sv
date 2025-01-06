@@ -17,25 +17,25 @@ See LICENSE file in the project root for full license information
 
 module exe_m64_mult #(
 ) (
-    input logic clk_i,
-    input logic arst_ni,
+    input logic clk_i,          // Clock input
+    input logic arst_ni,        // Asynchronous reset, active low
 
-    input  logic        MUL_i,
-    input  logic        MULH_i,
-    input  logic        MULHSU_i,
-    input  logic        MULHU_i,
-    input  logic        MULW_i,
-    input  logic [63:0] rs1_i,
-    input  logic [63:0] rs2_i,
-    input  logic [5:0]  rd_i,
-    input  logic        valid_i,
-    output logic        ready_o,
+    input  logic        MUL_i,      // Multiply operation signal
+    input  logic        MULH_i,     // Multiply high operation signal
+    input  logic        MULHSU_i,   // Multiply high signed-unsigned operation signal
+    input  logic        MULHU_i,    // Multiply high unsigned operation signal
+    input  logic        MULW_i,     // Multiply word operation signal
+    input  logic [63:0] rs1_i,      // Source register 1 input
+    input  logic [63:0] rs2_i,      // Source register 2 input
+    input  logic [5:0]  rd_i,       // Destination register input
+    input  logic        valid_i,    // Valid input signal
+    output logic        ready_o,    // Ready output signal
 
-    output logic [63:0] wr_data_o,
-    output logic [ 1:0] wr_size_o,
-    output logic [ 5:0] wr_addr_o,
-    output logic        valid_o,
-    input  logic        ready_i
+    output logic [63:0] wr_data_o,  // Write data output
+    output logic [ 1:0] wr_size_o,  // Write size output
+    output logic [ 5:0] wr_addr_o,  // Write address output
+    output logic        valid_o,    // Valid output signal
+    input  logic        ready_i     // Ready input signal
 );
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,13 +65,8 @@ module exe_m64_mult #(
   // FUNC IDENTIFY
   ////////////////////////////////////////////////
 
-  wor   this_module;
-
-  assign this_module = MUL_i;
-  assign this_module = MULH_i;
-  assign this_module = MULHSU_i;
-  assign this_module = MULHU_i;
-  assign this_module = MULW_i;
+  logic this_module;
+  assign this_module = MUL_i | MULH_i | MULHSU_i | MULHU_i | MULW_i;
 
   ////////////////////////////////////////////////
   // INITIAL VALID READY
@@ -101,15 +96,10 @@ module exe_m64_mult #(
     if (MUL_i | MULH_i | MULW_i) begin
       negative = multiplier[63] ^ multiplicand[63];
       if (multiplier[63]) multiplier = ~multiplier + 1;
-      multiplier[63] = '0;
       if (multiplicand[63]) multiplicand = ~multiplicand + 1;
-      multiplicand[63] = '0;
-
     end else if (MULHSU_i) begin
       negative = multiplicand[63];
       if (multiplicand[63]) multiplicand = ~multiplicand + 1;
-      multiplicand[63] = '0;
-
     end
 
   end
@@ -183,6 +173,7 @@ module exe_m64_mult #(
   //
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
+  // Crossbar and extension logic
   logic [15:0][66:0] ext67_res;
   logic [15:0][66:0] xbar_out;
 
@@ -225,7 +216,7 @@ module exe_m64_mult #(
 
   always_comb begin
     for (int i = 0; i < 4; i++) begin
-      res79[i] = ext79[i+3] + ext79[i+2] + ext79[i+1] + ext79[i+0];
+      res79[i] =   {ext79[4*i+3],12'b0} + {ext79[4*i+2],8'b0} + {ext79[4*i+1],4'b0} + ext79[4*i];
     end
   end
 
@@ -259,7 +250,7 @@ module exe_m64_mult #(
 
   logic [3:0][127:0] res128;
   logic [127:0] final_sum;
-  logic [63:0] semi_final_res_64;
+  logic [127:0] semi_final_res;
   logic [63:0] final_res;
 
   always_comb begin
@@ -268,11 +259,11 @@ module exe_m64_mult #(
     end
   end
 
-  always_comb final_sum = res128[0] + res128[1] + res128[2] + res128[3];
+  always_comb final_sum = {res128[3], 48'b0} + {res128[2], 32'b0} + {res128[1], 16'b0} + res128[0];
 
-  always_comb semi_final_res_64 = upper_q1 ? final_sum[127:64] : final_sum[63:0];
+  always_comb semi_final_res = negative_q1 ? ~final_sum + 1 : final_sum;
 
-  always_comb final_res = negative_q1 ? ~semi_final_res_64 + 1 : semi_final_res_64;
+  always_comb final_res = upper_q1 ? semi_final_res[127:64] : semi_final_res[63:0];
 
   logic word_q2;
 
@@ -289,13 +280,5 @@ module exe_m64_mult #(
   );
 
   always_comb wr_size_o = word_q2 ? 2'b10 : 2'b11;
-
-`ifdef SIMULATION
-  initial begin
-    if (64 != 64) begin
-      $fatal(1, "\033[1;33m%m Unsupported XLEN\033[0m");
-    end
-  end
-`endif  // SIMULATION
 
 endmodule

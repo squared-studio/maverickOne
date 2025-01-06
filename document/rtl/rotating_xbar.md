@@ -15,7 +15,7 @@ among the outputs, making it useful in communication systems and digital designs
 flexible and dynamic data routing. The module leverages an instantiated crossbar switch (xbar) and
 calculates the selection indices dynamically to achieve the desired rotation.
 <br>**This file is part of DSInnovators:maverickOne**
-<br>**Copyright (c) 2024 DSInnovators**
+Copyright (c) 2024 DSInnovators
 <br>**Licensed under the MIT License**
 <br>**See LICENSE file in the project root for full license information**
 
