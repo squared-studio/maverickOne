@@ -222,6 +222,9 @@ package maverickOne_pkg;
     // The `pc` hold's the physical address of the current instruction.
     logic [XLEN-1:0] pc;
 
+    // `mem_op` field is set high when the current instruction is a memory operation
+    logic mem_op;
+
     // The `blocking` field is set high when the current instruction must block next instructions
     logic blocking;
 

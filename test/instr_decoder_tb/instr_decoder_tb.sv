@@ -68,6 +68,7 @@ module instr_decoder_tb;
   bit rs1_ok;
   bit rs2_ok;
   bit rs3_ok;
+  bit mem_op_ok;
   bit blocking_ok;
   bit imm_ok;
   bit reg_req_ok;
@@ -77,6 +78,7 @@ module instr_decoder_tb;
   int tx_rs1;
   int tx_rs2;
   int tx_rs3;
+  int tx_mem_op;
   int tx_blocking;
   int tx_imm;
   int tx_reg_req;
@@ -262,6 +264,50 @@ module instr_decoder_tb;
       32'h10500073:                         exp_cmd_o.func[WFI] = '1;
       default:                              exp_cmd_o.func = '0;
     endcase
+  end
+
+  // check for mem_op condition
+  always_comb begin : mem_op
+    exp_cmd_o.mem_op = '0;
+    exp_cmd_o.mem_op =
+     (exp_cmd_o.func[LB])
+    |(exp_cmd_o.func[LBU])
+    |(exp_cmd_o.func[LH])
+    |(exp_cmd_o.func[LHU])
+    |(exp_cmd_o.func[LW])
+    |(exp_cmd_o.func[LWU])
+    |(exp_cmd_o.func[LD])
+    |(exp_cmd_o.func[SB])
+    |(exp_cmd_o.func[SH])
+    |(exp_cmd_o.func[SW])
+    |(exp_cmd_o.func[SD])
+    |(exp_cmd_o.func[FLW])
+    |(exp_cmd_o.func[FSW])
+    |(exp_cmd_o.func[SD])
+    |(exp_cmd_o.func[FLD])
+    |(exp_cmd_o.func[FSD])
+    |(exp_cmd_o.func[LR_W])
+    |(exp_cmd_o.func[SC_W])
+    |(exp_cmd_o.func[AMOSWAP_W])
+    |(exp_cmd_o.func[AMOADD_W])
+    |(exp_cmd_o.func[AMOXOR_W])
+    |(exp_cmd_o.func[AMOAND_W])
+    |(exp_cmd_o.func[AMOOR_W])
+    |(exp_cmd_o.func[AMOMIN_W])
+    |(exp_cmd_o.func[AMOMAX_W])
+    |(exp_cmd_o.func[AMOMINU_W])
+    |(exp_cmd_o.func[AMOMAXU_W])
+    |(exp_cmd_o.func[LR_D])
+    |(exp_cmd_o.func[SC_D])
+    |(exp_cmd_o.func[AMOSWAP_D])
+    |(exp_cmd_o.func[AMOADD_D])
+    |(exp_cmd_o.func[AMOXOR_D])
+    |(exp_cmd_o.func[AMOAND_D])
+    |(exp_cmd_o.func[AMOOR_D])
+    |(exp_cmd_o.func[AMOMIN_D])
+    |(exp_cmd_o.func[AMOMAX_D])
+    |(exp_cmd_o.func[AMOMINU_D])
+    |(exp_cmd_o.func[AMOMAXU_D]);
   end
 
   // check for blocking condition
@@ -487,8 +533,8 @@ module instr_decoder_tb;
       (1 << OR):        imm_src_infer = NONE;
       (1 << AND):       imm_src_infer = NONE;
       (1 << FENCE):     imm_src_infer = IIMM;
-      (1 << ECALL):     imm_src_infer = IIMM;
-      (1 << EBREAK):    imm_src_infer = IIMM;
+      (1 << ECALL):     imm_src_infer = NONE;
+      (1 << EBREAK):    imm_src_infer = NONE;
       (1 << LWU):       imm_src_infer = IIMM;
       (1 << LD):        imm_src_infer = IIMM;
       (1 << SD):        imm_src_infer = SIMM;
@@ -737,6 +783,7 @@ module instr_decoder_tb;
     rs1_ok      = 1;
     rs2_ok      = 1;
     rs3_ok      = 1;
+    mem_op_ok   = 1;
     blocking_ok = 1;
     imm_ok      = 1;
     reg_req_ok  = 1;
@@ -747,6 +794,7 @@ module instr_decoder_tb;
     tx_rs1      = 0;
     tx_rs2      = 0;
     tx_rs3      = 0;
+    tx_mem_op   = 0;
     tx_blocking = 0;
     tx_imm      = 0;
     tx_reg_req  = 0;
@@ -764,7 +812,7 @@ module instr_decoder_tb;
           func_t func;
           func = func_t'($clog2(exp_cmd_o.func));
           $display();
-          $write("\033[1;31m[%0t]%s has faults at 0x%08h\033[0m DUT:", $realtime, func.name,
+          $write("\033[1;31m[%0t] %s has faults at 0x%08h\033[0m DUT:", $realtime, func.name,
                  code_i);
           foreach (cmd_o.func[i]) begin
             if (cmd_o.func[i]) begin
@@ -779,6 +827,7 @@ module instr_decoder_tb;
           `INSTR_DECODER_TB_MON_CHECK(rs1)
           `INSTR_DECODER_TB_MON_CHECK(rs2)
           `INSTR_DECODER_TB_MON_CHECK(rs3)
+          `INSTR_DECODER_TB_MON_CHECK(mem_op)
           `INSTR_DECODER_TB_MON_CHECK(blocking)
           `INSTR_DECODER_TB_MON_CHECK(imm)
           `INSTR_DECODER_TB_MON_CHECK(reg_req)
@@ -792,6 +841,7 @@ module instr_decoder_tb;
           tx_rs1++;
           tx_rs2++;
           tx_rs3++;
+          tx_mem_op++;
           tx_blocking++;
           tx_imm++;
           tx_reg_req++;
@@ -979,6 +1029,7 @@ module instr_decoder_tb;
   initial begin
     automatic bit keep_going = 1;
     func_t instr;
+    #4ns;
     while (keep_going) begin
       repeat (5000) @(posedge clk_i);
       $write("\033[1;33m%0t Remaining:\033[0m", $realtime);
@@ -999,6 +1050,7 @@ module instr_decoder_tb;
     $display("Success_rs1            %d", tx_rs1);
     $display("Success_rs2            %d", tx_rs2);
     $display("Success_rs3            %d", tx_rs3);
+    $display("Success_mem_op         %d", tx_mem_op);
     $display("Success_blocking       %d", tx_blocking);
     $display("Success_imm            %d", tx_imm);
     $display("Success_reg_req        %d", tx_reg_req);
@@ -1010,6 +1062,7 @@ module instr_decoder_tb;
     result_print(rs1_ok, "RS1 read check");
     result_print(rs2_ok, "RS2 read check");
     result_print(rs3_ok, "RS3 read check");
+    result_print(mem_op_ok, "MEM_OP read check");
     result_print(blocking_ok, "BLOCKING read check");
     result_print(imm_ok, "IMM read check");
     result_print(reg_req_ok, "REG_REQ read check");

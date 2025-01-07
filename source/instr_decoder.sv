@@ -759,8 +759,6 @@ module instr_decoder #(
   assign is_iimm = cmd_o.func[CSRRC];
   assign is_iimm = cmd_o.func[CSRRS];
   assign is_iimm = cmd_o.func[CSRRW];
-  assign is_iimm = cmd_o.func[EBREAK];
-  assign is_iimm = cmd_o.func[ECALL];
   assign is_iimm = cmd_o.func[FENCE];
   assign is_iimm = cmd_o.func[FLD];
   assign is_iimm = cmd_o.func[FLW];
@@ -868,6 +866,50 @@ module instr_decoder #(
   end
 
   always_comb cmd_o.pc = pc_i;
+
+  wor is_mem_op;
+  assign is_mem_op = cmd_o.func[LB];
+  assign is_mem_op = cmd_o.func[LBU];
+  assign is_mem_op = cmd_o.func[LH];
+  assign is_mem_op = cmd_o.func[LHU];
+  assign is_mem_op = cmd_o.func[LW];
+  assign is_mem_op = cmd_o.func[LWU];
+  assign is_mem_op = cmd_o.func[LD];
+  assign is_mem_op = cmd_o.func[SB];
+  assign is_mem_op = cmd_o.func[SH];
+  assign is_mem_op = cmd_o.func[SW];
+  assign is_mem_op = cmd_o.func[SD];
+  assign is_mem_op = cmd_o.func[FLW];
+  assign is_mem_op = cmd_o.func[FSW];
+  assign is_mem_op = cmd_o.func[SD];
+  assign is_mem_op = cmd_o.func[FLD];
+  assign is_mem_op = cmd_o.func[FSD];
+  assign is_mem_op = cmd_o.func[LR_W];
+  assign is_mem_op = cmd_o.func[SC_W];
+  assign is_mem_op = cmd_o.func[AMOSWAP_W];
+  assign is_mem_op = cmd_o.func[AMOADD_W];
+  assign is_mem_op = cmd_o.func[AMOXOR_W];
+  assign is_mem_op = cmd_o.func[AMOAND_W];
+  assign is_mem_op = cmd_o.func[AMOOR_W];
+  assign is_mem_op = cmd_o.func[AMOMIN_W];
+  assign is_mem_op = cmd_o.func[AMOMAX_W];
+  assign is_mem_op = cmd_o.func[AMOMINU_W];
+  assign is_mem_op = cmd_o.func[AMOMAXU_W];
+  assign is_mem_op = cmd_o.func[LR_D];
+  assign is_mem_op = cmd_o.func[SC_D];
+  assign is_mem_op = cmd_o.func[AMOSWAP_D];
+  assign is_mem_op = cmd_o.func[AMOADD_D];
+  assign is_mem_op = cmd_o.func[AMOXOR_D];
+  assign is_mem_op = cmd_o.func[AMOAND_D];
+  assign is_mem_op = cmd_o.func[AMOOR_D];
+  assign is_mem_op = cmd_o.func[AMOMIN_D];
+  assign is_mem_op = cmd_o.func[AMOMAX_D];
+  assign is_mem_op = cmd_o.func[AMOMINU_D];
+  assign is_mem_op = cmd_o.func[AMOMAXU_D];
+
+  always_comb begin
+    cmd_o.mem_op = is_mem_op;
+  end
 
   wor is_blocking;
   assign is_blocking = cmd_o.func[BEQ];
