@@ -1,7 +1,7 @@
-<svg height="540" width="540" xmlns="http://www.w3.org/2000/svg">
+<svg height="740" width="740" xmlns="http://www.w3.org/2000/svg">
 <rect width="100%" height="100%" x="0" y="0" style="fill:white;stroke:white;stroke-width:0"/>
 <g style="fill:white;stroke:black;stroke-width:1">
-<rect width="425" height="425" x="60" y="60"/>
+<rect width="625" height="625" x="60" y="60"/>
 <polygon points="10,95 10,85 30,85 40,95 60,95 40,95 30,105 10,105 10,95"/>
 <text x="65" y="85" dominant-baseline="hanging" text-anchor="start" font-size="20" style="fill:black;stroke:black;stroke-width:0">pl_valid_i</text>
 <polygon points="10,195 10,185 30,185 40,195 60,195 40,195 30,205 10,205 10,195"/>
@@ -14,8 +14,14 @@
 <text x="65" y="385" dominant-baseline="hanging" text-anchor="start" font-size="20" style="fill:black;stroke:black;stroke-width:0">locks_i</text>
 <polygon points="10,445 20,435 40,435 40,445 60,445 40,445 40,455 20,455 10,445"/>
 <text x="65" y="435" dominant-baseline="hanging" text-anchor="start" font-size="20" style="fill:black;stroke:black;stroke-width:0">locks_o</text>
-<polygon points="485,445 505,445 505,435 525,435 535,445 525,455 505,455 505,445 485,445"/>
-<text x="480" y="435" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">arb_req_o</text>
-<text x="270" y="500" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">reg_gnt_ckr</text>
+<polygon points="10,545 10,535 30,535 40,545 60,545 40,545 30,555 10,555 10,545"/>
+<text x="65" y="535" dominant-baseline="hanging" text-anchor="start" font-size="20" style="fill:black;stroke:black;stroke-width:0">mem_op_i</text>
+<polygon points="10,595 10,585 30,585 40,595 60,595 40,595 30,605 10,605 10,595"/>
+<text x="65" y="585" dominant-baseline="hanging" text-anchor="start" font-size="20" style="fill:black;stroke:black;stroke-width:0">mem_busy_i</text>
+<polygon points="10,645 20,635 40,635 40,645 60,645 40,645 40,655 20,655 10,645"/>
+<text x="65" y="635" dominant-baseline="hanging" text-anchor="start" font-size="20" style="fill:black;stroke:black;stroke-width:0">mem_busy_o</text>
+<polygon points="685,645 705,645 705,635 725,635 735,645 725,655 705,655 705,645 685,645"/>
+<text x="680" y="635" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">arb_req_o</text>
+<text x="370" y="700" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">reg_gnt_ckr</text>
 </g>
 </svg>

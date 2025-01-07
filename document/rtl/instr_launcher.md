@@ -7,8 +7,8 @@
 
 ## Description
 
-The instr_launcher module manages the instructions heading for execution. It temporarily store
-instructions, checks register availability, and launches them for execution avoiding hazzards.
+The instr_launcher module manages the instructions heading for execution. It temporarily stores
+instructions, checks register availability, and launches them for execution while avoiding hazards.
 
 <br>**This file is part of squared-studio:maverickOne**
 <br>**Copyright (c) 2025 squared-studio**

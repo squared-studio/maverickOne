@@ -1,6 +1,6 @@
 /*
-The instr_launcher module manages the instructions heading for execution. It temporarily store
-instructions, checks register availability, and launches them for execution avoiding hazzards.
+The instr_launcher module manages the instructions heading for execution. It temporarily stores
+instructions, checks register availability, and launches them for execution while avoiding hazards.
 
 Author: Foez Ahmed (https://github.com/foez-ahmed)
 This file is part of squared-studio:maverickOne
@@ -40,7 +40,7 @@ module instr_launcher #(
   //-LOCALPARAMS GENERATED
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  // Maximum Number of outstanding instructions
+  // Maximum number of outstanding instructions
   localparam int NOS = maverickOne_pkg::NUM_OUTSTANDING;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +57,7 @@ module instr_launcher #(
   logic [NOS:0] pl_outs_ready;  // Ready signals for pipeline outputs
 
   locks_t locks[NOS+2];  // Lock signals propagating between reg_gnt_ckr
+  locks_t mem_busy[NOS+2];  // Memory busy signals propagating between reg_gnt_ckr
 
   logic [NOS:0] arb_req;  // Arbitration request signals
   logic [NOS:0] arb_gnt;  // Arbitration grant signals
@@ -74,6 +75,7 @@ module instr_launcher #(
 
   // Initialize lock signals
   assign locks[0]         = locks_i;
+  assign mem_busy[0]      = '0;
 
   // Assign output instruction and valid signal based on granted request index
   assign instr_out_o      = pl_outs[gnt_idx];
@@ -84,7 +86,7 @@ module instr_launcher #(
   //-RTLS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  // Generate pipeline
+  // Generate pipeline stages
   for (genvar i = 0; i < NOS; i++) begin : g_splits
     pipeline_split #(
         .DW($bits(instr_in_i))
@@ -119,7 +121,7 @@ module instr_launcher #(
       .data_out_ready_i(pl_outs_ready[0])
   );
 
-  // Generate grant checkers for each pipeline
+  // Generate grant checkers for each pipeline stage
   for (genvar i = 0; i < NOS + 1; i++) begin : g_ckeckers
     reg_gnt_ckr #() u_reg_gnt_ckr (
         .pl_valid_i(pl_outs_valid[i]),
@@ -128,11 +130,14 @@ module instr_launcher #(
         .reg_req_i(pl_outs[i].reg_req),
         .locks_i(locks[i]),
         .locks_o(locks[i+1]),
+        .mem_op_i(pl_outs[i].mem_op),
+        .mem_busy_i(mem_busy[i]),
+        .mem_busy_o(mem_busy[i+1]),
         .arb_req_o(arb_req[i])
     );
   end
 
-  // Fixed priority arbiter for arbitration among pipeline
+  // Fixed priority arbiter for arbitration among pipeline stages
   fixed_priority_arbiter #(
       .NUM_REQ(NOS + 1)
   ) u_fixed_priority_arbiter (
@@ -150,7 +155,7 @@ module instr_launcher #(
       .index_valid_o(instr_out_valid_o)
   );
 
-  // Generate clear signals for pipeline
+  // Generate clear signals for pipeline stages
   for (genvar i = 0; i < NOS; i++) begin : g_clears
     assign clears[i] = clears[i+1] & (gnt_idx != (i + 1));
   end
