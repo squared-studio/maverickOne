@@ -44,10 +44,13 @@ module reg_gnt_ckr_tb;
   logicLogNR rd_i;  // destination register index
   logicNR reg_req_i;  // instruction source register requirement
   logicNR locks_i;  // register locking status input
+  logic mem_op_i;  // memory operation flag
+  logic mem_busy_i;  // memory busy flag from previous operation
 
   // RTL Output
   logicNR locks_o;  // register locking status output
   logic arb_req_o;  // enable arbitration if all instruction source registers are unlocked
+  logic mem_busy_o;  // memory busy flag for next operation
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-VARIABLES
@@ -73,7 +76,10 @@ module reg_gnt_ckr_tb;
       .reg_req_i,
       .locks_i,
       .locks_o,
-      .arb_req_o
+      .mem_op_i,
+      .mem_busy_i,  // TODO UPDATE TB. WHY IS IT NOT FAILING AFTER NEW SIGNAL ADDITION
+      .mem_busy_o,  // TODO UPDATE TB. WHY IS IT NOT FAILING AFTER NEW SIGNAL ADDITION
+      .arb_req_o  // TODO UPDATE TB. WHY IS IT NOT FAILING AFTER NEW SIGNAL ADDITION
   );
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +94,9 @@ module reg_gnt_ckr_tb;
         blocking_i <= $urandom_range(0, 99) < 10;  // 10% blocking calls
         rd_i       <= $urandom;
         reg_req_i  <= 1 << $urandom_range(0, NR - 1) | 1 << $urandom_range(0, NR - 1);
-        locks_i    <= $urandom;
+        locks_i    <= {$urandom, $urandom};
+        mem_op_i   <= $urandom;  // random memory operation flag
+        mem_busy_i <= $urandom;  // random memory busy flag
       end
     join_none
   endtask

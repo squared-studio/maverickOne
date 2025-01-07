@@ -1,8 +1,8 @@
 /*
-It handles register locking and arbitration in a pipelined environment for a RISC-V core. The module
-ensures that necessary registers are locked/unlocked based on the current pipeline state and the
+This module handles register locking and arbitration in a pipelined environment for a RISC-V core.
+It ensures that necessary registers are locked/unlocked based on the current pipeline state and the
 requirements of instructions being executed.
-Author : Subhan Zawad Bihan (https://github.com/SubhanBihan)
+Author : Foez Ahmed (https://github.com/foez-ahmed)
 This file is part of squared-studio:maverickOne
 Copyright (c) 2025 squared-studio
 Licensed under the MIT License
@@ -14,24 +14,31 @@ See LICENSE file in the project root for full license information
 module reg_gnt_ckr #(
     parameter int NR = maverickOne_pkg::NUM_REGS  // Number of registers
 ) (
-    // 1 for valid instruction from pipeline.
+    // Valid instruction signal from the pipeline.
     input logic pl_valid_i,
 
-    // For blocking instructions. If 1, lock all registers.
+    // Signal to lock all registers for blocking instructions.
     input logic                  blocking_i,
-    // Index of destination register.
+    // Index of the destination register.
     input logic [$clog2(NR)-1:0] rd_i,
-    // Has 1s at the bits indicating required source registers by the current instruction.
+    // Bitmask indicating required source registers for the current instruction.
     input logic [        NR-1:0] reg_req_i,
 
-    // Input of locked registers.
+    // Input bitmask of locked registers.
     input  logic [NR-1:0] locks_i,
-    // Output of locked registers. Note that when blocking_i = 0, rd_i = 0 register can never be locked
-    // (only exception) - otherwise lock register indicated by rd_i.
+    // Output bitmask of locked registers. When blocking_i = 0, register 0 (rd_i = 0) can never be
+    // locked. Otherwise, lock the register indicated by rd_i.
     output logic [NR-1:0] locks_o,
 
-    // 0/1 to arbiter based on locks_i and source registers required (all required source registers
-    // must be un-locked to "pass").
+    // Flag indicating if the current operation is a memory operation.
+    input  logic mem_op_i,
+    // Flag indicating if the memory is busy from the previous operation.
+    input  logic mem_busy_i,
+    // Flag indicating if the memory will be busy for the next operation.
+    output logic mem_busy_o,
+
+    // Request signal to the arbiter based on locks_i and required source registers. All required
+    // source registers must be unlocked to assert this signal.
     output logic arb_req_o
 );
 
@@ -39,8 +46,13 @@ module reg_gnt_ckr #(
   //-ASSIGNMENTS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  always_comb arb_req_o = pl_valid_i & ~(|(locks_i & reg_req_i));
+  // Update memory busy flag for the next operation.
+  always_comb mem_busy_o = mem_busy_i | mem_op_i;
 
+  // Generate arbiter request signal based on memory operation and locked registers.
+  always_comb arb_req_o = ~(mem_op_i & mem_busy_i) ? (pl_valid_i & ~(|(locks_i & reg_req_i))) : '0;
+
+  // Update locked registers based on the current pipeline state and blocking signal.
   always_comb begin
     logic [NR-1:0] locks_mask;
     locks_mask = '0;
