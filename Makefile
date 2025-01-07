@@ -55,6 +55,8 @@ ifeq ($(VCD),1)
 XVLOG_DEFS += --define ENABLE_DUMPFILE
 endif
 
+GREP_EW := grep -E "WARNING:|ERROR:|" --color=auto
+
 #########################################################################################
 # FILES
 #########################################################################################
@@ -121,7 +123,7 @@ rtl_init_sim: print_logo soft_clean xvlog init_xelab init_xsim print_logo
 
 define compile
   $(eval SUB_LIB := $(shell echo "$(wordlist 1, 25,$(COMPILE_LIB))"))
-  cd build; xvlog $(INC_DIR) -sv $(SUB_LIB) --nolog $(XVLOG_DEFS) | tee -a ../log/$(TOP)_$(CONFIG).log
+  cd build; xvlog $(INC_DIR) -sv $(SUB_LIB) --nolog $(XVLOG_DEFS) | tee -a ../log/$(TOP)_$(CONFIG).log | $(GREP_EW)
   $(eval COMPILE_LIB := $(wordlist 26, $(words $(COMPILE_LIB)), $(COMPILE_LIB)))
   $(if $(COMPILE_LIB), $(call compile))
 endef
@@ -137,7 +139,7 @@ xelab:
 ifeq ($(TOP), )
 	@$(error TOP not set)
 else
-	@cd build; xelab $(TOP) -s $(TOP) --debug wave --nolog | tee -a ../log/$(TOP)_$(CONFIG).log
+	@cd build; xelab $(TOP) -s $(TOP) --debug wave --nolog | tee -a ../log/$(TOP)_$(CONFIG).log | $(GREP_EW)
 endif
 
 .PHONY: init_xelab
@@ -145,7 +147,7 @@ init_xelab:
 ifeq ($(RTL), )
 	@$(error RTL not set)
 else
-	@cd build; xelab $(RTL) -s $(RTL) --nolog
+	@cd build; xelab $(RTL) -s $(RTL) --nolog | $(GREP_EW)
 endif
 
 .PHONY: xsim
@@ -154,7 +156,7 @@ ifeq ($(TOP), )
 	@$(error TOP not set)
 else
 	@echo -n "$(TOP) $(CONFIG)" > build/config
-	@cd build; xsim $(TOP) --runall --nolog | tee -a ../log/$(TOP)_$(CONFIG).log
+	@cd build; xsim $(TOP) --runall --nolog | tee -a ../log/$(TOP)_$(CONFIG).log | $(GREP_EW)
 endif
 
 .PHONY: gui_xsim
@@ -163,7 +165,7 @@ ifeq ($(TOP), )
 	@$(error TOP not set)
 else
 	@echo -n "$(TOP) $(CONFIG)" > build/config
-	@cd build; xsim $(TOP) --gui --nolog
+	@cd build; xsim $(TOP) --gui --nolog | $(GREP_EW)
 endif
 
 .PHONY: init_xsim
@@ -171,7 +173,7 @@ init_xsim:
 ifeq ($(RTL), )
 	@$(error RTL not set)
 else
-	@cd build; xsim $(RTL) --runall --nolog
+	@cd build; xsim $(RTL) --runall --nolog | $(GREP_EW)
 endif
 
 define make_clk_i_100_MHz
@@ -229,7 +231,7 @@ generate_flist: list_modules
 list_modules: soft_clean
 	@$(eval COMPILE_LIB := $(COMP_LIB))
 	@$(call compile)
-	@cd build; xelab $(RTL) -s $(RTL)
+	@cd build; xelab $(RTL) -s $(RTL) | $(GREP_EW)
 	@cat build/xelab.log | grep -E "work" > build/list
 	@sed -i "s/.*work\.//gi" build/list;
 	@sed -i "s/(.*//gi" build/list;
