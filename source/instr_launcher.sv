@@ -57,7 +57,7 @@ module instr_launcher #(
   logic [NOS:0] pl_outs_ready;  // Ready signals for pipeline outputs
 
   locks_t locks[NOS+2];  // Lock signals propagating between reg_gnt_ckr
-  locks_t mem_busy[NOS+2];  // Memory busy signals propagating between reg_gnt_ckr
+  logic mem_busy[NOS+2];  // Memory busy signals propagating between reg_gnt_ckr
 
   logic [NOS:0] arb_req;  // Arbitration request signals
   logic [NOS:0] arb_gnt;  // Arbitration grant signals
