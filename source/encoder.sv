@@ -52,6 +52,7 @@ module encoder #(
     always_comb index_o[i] = |index_or_red[i];  // OR reduction results to form the output index
   end
 
+  // Determine if any input wire is active
   always_comb index_valid_o = |wire_in;
 
 endmodule

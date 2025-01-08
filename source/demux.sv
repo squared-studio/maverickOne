@@ -25,6 +25,7 @@ module demux #(
   //-ASSIGNMENTS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
+  // Generate assignments for each element and bit
   for (genvar elem = 0; elem < NUM_ELEM; elem++) begin : g_elem
     for (genvar bits = 0; bits < ELEM_WIDTH; bits++) begin : g_bits
       always_comb
@@ -36,6 +37,7 @@ module demux #(
   //-RTLS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
+  // Instantiate the decoder to generate grant signals
   decoder_no_valid #(
       .NUM_WIRE(NUM_ELEM)  // Number of wires for the decoder
   ) u_decoder_no_valid (

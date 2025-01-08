@@ -20,15 +20,15 @@ module decoder_no_valid #(
   // Generate constant compare instances for each wire
   for (genvar i = 0; i < NUM_WIRE; i++) begin : g_const_comp
     constant_compare #(
-        .IP_WIDTH   ($clog2(NUM_WIRE)),
-        .CMP_ENABLES('1),
-        .EXP_RESULT (i),
-        .OP_WIDTH   (1),
-        .MATCH_TRUE ('1),
-        .MATCH_FALSE('0)
+        .IP_WIDTH   ($clog2(NUM_WIRE)),  // Width of the input index
+        .CMP_ENABLES('1),                 // Enable comparison
+        .EXP_RESULT (i),                  // Expected result for comparison
+        .OP_WIDTH   (1),                  // Output width
+        .MATCH_TRUE ('1),                 // Output value when match is true
+        .MATCH_FALSE('0)                  // Output value when match is false
     ) u_constant_compare (
-        .in_i (index_i),
-        .out_o(wire_o[i])
+        .in_i (index_i),                  // Input index
+        .out_o(wire_o[i])                // Output wire
     );
   end
 

@@ -19,18 +19,18 @@ helping to predict the next instruction address in case of a branch or jump.
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|
 |-|-|-|-|-|
-|NUM_BTBL|int||maverickOne_pkg::NUM_BTBL|Number of branch target buffer Lines|
-|XLEN|int||maverickOne_pkg::XLEN|integer register width|
+|NUM_BTBL|int||maverickOne_pkg::NUM_BTBL|Number of branch target buffer lines|
+|XLEN|int||maverickOne_pkg::XLEN|Integer register width|
 
 ## Ports
 |Name|Direction|Type|Dimension|Description|
 |-|-|-|-|-|
 |clk_i|input|logic||Clock input|
-|arst_ni|input|logic||Asynchronous Reset input|
+|arst_ni|input|logic||Asynchronous reset input|
 |current_addr_i|input|logic [XLEN-1:0]||Current address (EXEC) input|
 |next_addr_i|input|logic [XLEN-1:0]||Next address (EXEC) input|
-|pc_i|input|logic [XLEN-1:0]||pc (IF) input|
-|is_jump_i|input|logic||Is Jump/Branch (IF) input|
-|found_o|output|logic||Found match in buffer output|
-|table_update_o|output|logic||Table update event output|
-|next_pc_o|output|logic [XLEN-1:0]||Next pc (in case of jump) output|
+|pc_i|input|logic [XLEN-1:0]||Program counter (IF) input|
+|is_jump_i|input|logic||Is jump/branch (IF) input|
+|match_found_o|output|logic||Found match in buffer output|
+|update_table_o|output|logic||Table update event output|
+|next_pc_o|output|logic [XLEN-1:0]||Next program counter (in case of jump) output|

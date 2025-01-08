@@ -15,9 +15,9 @@
 <polygon points="10,395 10,385 30,385 40,395 60,395 40,395 30,405 10,405 10,395"/>
 <text x="65" y="385" dominant-baseline="hanging" text-anchor="start" font-size="20" style="fill:black;stroke:black;stroke-width:0">is_jump_i</text>
 <polygon points="435,295 455,295 455,285 475,285 485,295 475,305 455,305 455,295 435,295"/>
-<text x="430" y="285" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">found_o</text>
+<text x="430" y="285" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">match_found_o</text>
 <polygon points="435,345 455,345 455,335 475,335 485,345 475,355 455,355 455,345 435,345"/>
-<text x="430" y="335" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">table_update_o</text>
+<text x="430" y="335" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">update_table_o</text>
 <polygon points="435,395 455,395 455,385 475,385 485,395 475,405 455,405 455,395 435,395"/>
 <text x="430" y="385" dominant-baseline="hanging" text-anchor="end" font-size="20" style="fill:black;stroke:black;stroke-width:0">next_pc_o</text>
 <text x="245" y="450" dominant-baseline="hanging" text-anchor="middle" font-size="30" style="fill:black;stroke:black;stroke-width:0">branch_target_buffer</text>

@@ -138,18 +138,18 @@ module instr_decoder #(
     uimm[31:12] = code_i[31:12];
   end
 
-  `define INSTR_DECODER_CMP(__CMP__, __EXP__, __IDX__)                                \
-    constant_compare #(                                                                           \
-        .IP_WIDTH(32),                                                                            \
-        .CMP_ENABLES(``__CMP__``),                                                                \
-        .EXP_RESULT(``__EXP__``),                                                                 \
-        .OP_WIDTH(1),                                                                             \
-        .MATCH_TRUE('1),                                                                          \
-        .MATCH_FALSE('0)                                                                          \
-    ) u_constant_compare_``__IDX__`` (                                                            \
-        .in_i (code_i),                                                                           \
-        .out_o(cmd_o.func[``__IDX__``])                                                           \
-    );                                                                                            \
+  `define INSTR_DECODER_CMP(__CMP__, __EXP__, __IDX__) \
+    constant_compare #(                                \
+        .IP_WIDTH(32),                                 \
+        .CMP_ENABLES(``__CMP__``),                     \
+        .EXP_RESULT(``__EXP__``),                      \
+        .OP_WIDTH(1),                                  \
+        .MATCH_TRUE('1),                               \
+        .MATCH_FALSE('0)                               \
+    ) u_constant_compare_``__IDX__`` (                 \
+        .in_i (code_i),                                \
+        .out_o(cmd_o.func[``__IDX__``])                \
+    );                                                 \
 
   // Decode the instruction and set the intermediate function
   `INSTR_DECODER_CMP(32'h0000007F, 32'h00000017, AUIPC)
@@ -310,150 +310,154 @@ module instr_decoder #(
   `INSTR_DECODER_CMP(32'hFFFFFFFF, 32'h30200073, MRET)
   `INSTR_DECODER_CMP(32'hFFFFFFFF, 32'h10500073, WFI)
 
-  wor is_xrd;
-  assign is_xrd = cmd_o.func[ADD];
-  assign is_xrd = cmd_o.func[ADDI];
-  assign is_xrd = cmd_o.func[ADDIW];
-  assign is_xrd = cmd_o.func[ADDW];
-  assign is_xrd = cmd_o.func[AMOADD_D];
-  assign is_xrd = cmd_o.func[AMOADD_W];
-  assign is_xrd = cmd_o.func[AMOAND_D];
-  assign is_xrd = cmd_o.func[AMOAND_W];
-  assign is_xrd = cmd_o.func[AMOMAX_D];
-  assign is_xrd = cmd_o.func[AMOMAX_W];
-  assign is_xrd = cmd_o.func[AMOMAXU_D];
-  assign is_xrd = cmd_o.func[AMOMAXU_W];
-  assign is_xrd = cmd_o.func[AMOMIN_D];
-  assign is_xrd = cmd_o.func[AMOMIN_W];
-  assign is_xrd = cmd_o.func[AMOMINU_D];
-  assign is_xrd = cmd_o.func[AMOMINU_W];
-  assign is_xrd = cmd_o.func[AMOOR_D];
-  assign is_xrd = cmd_o.func[AMOOR_W];
-  assign is_xrd = cmd_o.func[AMOSWAP_D];
-  assign is_xrd = cmd_o.func[AMOSWAP_W];
-  assign is_xrd = cmd_o.func[AMOXOR_D];
-  assign is_xrd = cmd_o.func[AMOXOR_W];
-  assign is_xrd = cmd_o.func[AND];
-  assign is_xrd = cmd_o.func[ANDI];
-  assign is_xrd = cmd_o.func[AUIPC];
-  assign is_xrd = cmd_o.func[CSRRC];
-  assign is_xrd = cmd_o.func[CSRRCI];
-  assign is_xrd = cmd_o.func[CSRRS];
-  assign is_xrd = cmd_o.func[CSRRSI];
-  assign is_xrd = cmd_o.func[CSRRW];
-  assign is_xrd = cmd_o.func[CSRRWI];
-  assign is_xrd = cmd_o.func[DIV];
-  assign is_xrd = cmd_o.func[DIVU];
-  assign is_xrd = cmd_o.func[DIVUW];
-  assign is_xrd = cmd_o.func[DIVW];
-  assign is_xrd = cmd_o.func[FCLASS_D];
-  assign is_xrd = cmd_o.func[FCLASS_S];
-  assign is_xrd = cmd_o.func[FCVT_L_D];
-  assign is_xrd = cmd_o.func[FCVT_L_S];
-  assign is_xrd = cmd_o.func[FCVT_LU_D];
-  assign is_xrd = cmd_o.func[FCVT_LU_S];
-  assign is_xrd = cmd_o.func[FCVT_W_D];
-  assign is_xrd = cmd_o.func[FCVT_W_S];
-  assign is_xrd = cmd_o.func[FCVT_WU_D];
-  assign is_xrd = cmd_o.func[FCVT_WU_S];
-  assign is_xrd = cmd_o.func[FENCE];
-  assign is_xrd = cmd_o.func[FEQ_D];
-  assign is_xrd = cmd_o.func[FEQ_S];
-  assign is_xrd = cmd_o.func[FLE_D];
-  assign is_xrd = cmd_o.func[FLE_S];
-  assign is_xrd = cmd_o.func[FLT_D];
-  assign is_xrd = cmd_o.func[FLT_S];
-  assign is_xrd = cmd_o.func[FMV_X_D];
-  assign is_xrd = cmd_o.func[FMV_X_W];
-  assign is_xrd = cmd_o.func[JAL];
-  assign is_xrd = cmd_o.func[JALR];
-  assign is_xrd = cmd_o.func[LB];
-  assign is_xrd = cmd_o.func[LBU];
-  assign is_xrd = cmd_o.func[LD];
-  assign is_xrd = cmd_o.func[LH];
-  assign is_xrd = cmd_o.func[LHU];
-  assign is_xrd = cmd_o.func[LR_D];
-  assign is_xrd = cmd_o.func[LR_W];
-  assign is_xrd = cmd_o.func[LUI];
-  assign is_xrd = cmd_o.func[LW];
-  assign is_xrd = cmd_o.func[LWU];
-  assign is_xrd = cmd_o.func[MUL];
-  assign is_xrd = cmd_o.func[MULH];
-  assign is_xrd = cmd_o.func[MULHSU];
-  assign is_xrd = cmd_o.func[MULHU];
-  assign is_xrd = cmd_o.func[MULW];
-  assign is_xrd = cmd_o.func[OR];
-  assign is_xrd = cmd_o.func[ORI];
-  assign is_xrd = cmd_o.func[REM];
-  assign is_xrd = cmd_o.func[REMU];
-  assign is_xrd = cmd_o.func[REMUW];
-  assign is_xrd = cmd_o.func[REMW];
-  assign is_xrd = cmd_o.func[SC_D];
-  assign is_xrd = cmd_o.func[SC_W];
-  assign is_xrd = cmd_o.func[SLL];
-  assign is_xrd = cmd_o.func[SLLI];
-  assign is_xrd = cmd_o.func[SLLIW];
-  assign is_xrd = cmd_o.func[SLLW];
-  assign is_xrd = cmd_o.func[SLT];
-  assign is_xrd = cmd_o.func[SLTI];
-  assign is_xrd = cmd_o.func[SLTIU];
-  assign is_xrd = cmd_o.func[SLTU];
-  assign is_xrd = cmd_o.func[SRA];
-  assign is_xrd = cmd_o.func[SRAI];
-  assign is_xrd = cmd_o.func[SRAIW];
-  assign is_xrd = cmd_o.func[SRAW];
-  assign is_xrd = cmd_o.func[SRL];
-  assign is_xrd = cmd_o.func[SRLI];
-  assign is_xrd = cmd_o.func[SRLIW];
-  assign is_xrd = cmd_o.func[SRLW];
-  assign is_xrd = cmd_o.func[SUB];
-  assign is_xrd = cmd_o.func[SUBW];
-  assign is_xrd = cmd_o.func[XOR];
-  assign is_xrd = cmd_o.func[XORI];
+  logic is_xrd;
+  always_comb begin
+    is_xrd = cmd_o.func[ADD]
+           | cmd_o.func[ADDI]
+           | cmd_o.func[ADDIW]
+           | cmd_o.func[ADDW]
+           | cmd_o.func[AMOADD_D]
+           | cmd_o.func[AMOADD_W]
+           | cmd_o.func[AMOAND_D]
+           | cmd_o.func[AMOAND_W]
+           | cmd_o.func[AMOMAX_D]
+           | cmd_o.func[AMOMAX_W]
+           | cmd_o.func[AMOMAXU_D]
+           | cmd_o.func[AMOMAXU_W]
+           | cmd_o.func[AMOMIN_D]
+           | cmd_o.func[AMOMIN_W]
+           | cmd_o.func[AMOMINU_D]
+           | cmd_o.func[AMOMINU_W]
+           | cmd_o.func[AMOOR_D]
+           | cmd_o.func[AMOOR_W]
+           | cmd_o.func[AMOSWAP_D]
+           | cmd_o.func[AMOSWAP_W]
+           | cmd_o.func[AMOXOR_D]
+           | cmd_o.func[AMOXOR_W]
+           | cmd_o.func[AND]
+           | cmd_o.func[ANDI]
+           | cmd_o.func[AUIPC]
+           | cmd_o.func[CSRRC]
+           | cmd_o.func[CSRRCI]
+           | cmd_o.func[CSRRS]
+           | cmd_o.func[CSRRSI]
+           | cmd_o.func[CSRRW]
+           | cmd_o.func[CSRRWI]
+           | cmd_o.func[DIV]
+           | cmd_o.func[DIVU]
+           | cmd_o.func[DIVUW]
+           | cmd_o.func[DIVW]
+           | cmd_o.func[FCLASS_D]
+           | cmd_o.func[FCLASS_S]
+           | cmd_o.func[FCVT_L_D]
+           | cmd_o.func[FCVT_L_S]
+           | cmd_o.func[FCVT_LU_D]
+           | cmd_o.func[FCVT_LU_S]
+           | cmd_o.func[FCVT_W_D]
+           | cmd_o.func[FCVT_W_S]
+           | cmd_o.func[FCVT_WU_D]
+           | cmd_o.func[FCVT_WU_S]
+           | cmd_o.func[FENCE]
+           | cmd_o.func[FEQ_D]
+           | cmd_o.func[FEQ_S]
+           | cmd_o.func[FLE_D]
+           | cmd_o.func[FLE_S]
+           | cmd_o.func[FLT_D]
+           | cmd_o.func[FLT_S]
+           | cmd_o.func[FMV_X_D]
+           | cmd_o.func[FMV_X_W]
+           | cmd_o.func[JAL]
+           | cmd_o.func[JALR]
+           | cmd_o.func[LB]
+           | cmd_o.func[LBU]
+           | cmd_o.func[LD]
+           | cmd_o.func[LH]
+           | cmd_o.func[LHU]
+           | cmd_o.func[LR_D]
+           | cmd_o.func[LR_W]
+           | cmd_o.func[LUI]
+           | cmd_o.func[LW]
+           | cmd_o.func[LWU]
+           | cmd_o.func[MUL]
+           | cmd_o.func[MULH]
+           | cmd_o.func[MULHSU]
+           | cmd_o.func[MULHU]
+           | cmd_o.func[MULW]
+           | cmd_o.func[OR]
+           | cmd_o.func[ORI]
+           | cmd_o.func[REM]
+           | cmd_o.func[REMU]
+           | cmd_o.func[REMUW]
+           | cmd_o.func[REMW]
+           | cmd_o.func[SC_D]
+           | cmd_o.func[SC_W]
+           | cmd_o.func[SLL]
+           | cmd_o.func[SLLI]
+           | cmd_o.func[SLLIW]
+           | cmd_o.func[SLLW]
+           | cmd_o.func[SLT]
+           | cmd_o.func[SLTI]
+           | cmd_o.func[SLTIU]
+           | cmd_o.func[SLTU]
+           | cmd_o.func[SRA]
+           | cmd_o.func[SRAI]
+           | cmd_o.func[SRAIW]
+           | cmd_o.func[SRAW]
+           | cmd_o.func[SRL]
+           | cmd_o.func[SRLI]
+           | cmd_o.func[SRLIW]
+           | cmd_o.func[SRLW]
+           | cmd_o.func[SUB]
+           | cmd_o.func[SUBW]
+           | cmd_o.func[XOR]
+           | cmd_o.func[XORI];
+  end
 
-  wor is_frd;
-  assign is_frd = cmd_o.func[FADD_D];
-  assign is_frd = cmd_o.func[FADD_S];
-  assign is_frd = cmd_o.func[FCVT_D_L];
-  assign is_frd = cmd_o.func[FCVT_D_LU];
-  assign is_frd = cmd_o.func[FCVT_D_S];
-  assign is_frd = cmd_o.func[FCVT_D_W];
-  assign is_frd = cmd_o.func[FCVT_D_WU];
-  assign is_frd = cmd_o.func[FCVT_S_D];
-  assign is_frd = cmd_o.func[FCVT_S_L];
-  assign is_frd = cmd_o.func[FCVT_S_LU];
-  assign is_frd = cmd_o.func[FCVT_S_W];
-  assign is_frd = cmd_o.func[FCVT_S_WU];
-  assign is_frd = cmd_o.func[FDIV_D];
-  assign is_frd = cmd_o.func[FDIV_S];
-  assign is_frd = cmd_o.func[FLD];
-  assign is_frd = cmd_o.func[FLW];
-  assign is_frd = cmd_o.func[FMADD_D];
-  assign is_frd = cmd_o.func[FMADD_S];
-  assign is_frd = cmd_o.func[FMAX_D];
-  assign is_frd = cmd_o.func[FMAX_S];
-  assign is_frd = cmd_o.func[FMIN_D];
-  assign is_frd = cmd_o.func[FMIN_S];
-  assign is_frd = cmd_o.func[FMSUB_D];
-  assign is_frd = cmd_o.func[FMSUB_S];
-  assign is_frd = cmd_o.func[FMUL_D];
-  assign is_frd = cmd_o.func[FMUL_S];
-  assign is_frd = cmd_o.func[FMV_D_X];
-  assign is_frd = cmd_o.func[FMV_W_X];
-  assign is_frd = cmd_o.func[FNMADD_D];
-  assign is_frd = cmd_o.func[FNMADD_S];
-  assign is_frd = cmd_o.func[FNMSUB_D];
-  assign is_frd = cmd_o.func[FNMSUB_S];
-  assign is_frd = cmd_o.func[FSGNJ_D];
-  assign is_frd = cmd_o.func[FSGNJ_S];
-  assign is_frd = cmd_o.func[FSGNJN_D];
-  assign is_frd = cmd_o.func[FSGNJN_S];
-  assign is_frd = cmd_o.func[FSGNJX_D];
-  assign is_frd = cmd_o.func[FSGNJX_S];
-  assign is_frd = cmd_o.func[FSQRT_D];
-  assign is_frd = cmd_o.func[FSQRT_S];
-  assign is_frd = cmd_o.func[FSUB_D];
-  assign is_frd = cmd_o.func[FSUB_S];
+  logic is_frd;
+  always_comb begin
+    is_frd = cmd_o.func[FADD_D]
+           | cmd_o.func[FADD_S]
+           | cmd_o.func[FCVT_D_L]
+           | cmd_o.func[FCVT_D_LU]
+           | cmd_o.func[FCVT_D_S]
+           | cmd_o.func[FCVT_D_W]
+           | cmd_o.func[FCVT_D_WU]
+           | cmd_o.func[FCVT_S_D]
+           | cmd_o.func[FCVT_S_L]
+           | cmd_o.func[FCVT_S_LU]
+           | cmd_o.func[FCVT_S_W]
+           | cmd_o.func[FCVT_S_WU]
+           | cmd_o.func[FDIV_D]
+           | cmd_o.func[FDIV_S]
+           | cmd_o.func[FLD]
+           | cmd_o.func[FLW]
+           | cmd_o.func[FMADD_D]
+           | cmd_o.func[FMADD_S]
+           | cmd_o.func[FMAX_D]
+           | cmd_o.func[FMAX_S]
+           | cmd_o.func[FMIN_D]
+           | cmd_o.func[FMIN_S]
+           | cmd_o.func[FMSUB_D]
+           | cmd_o.func[FMSUB_S]
+           | cmd_o.func[FMUL_D]
+           | cmd_o.func[FMUL_S]
+           | cmd_o.func[FMV_D_X]
+           | cmd_o.func[FMV_W_X]
+           | cmd_o.func[FNMADD_D]
+           | cmd_o.func[FNMADD_S]
+           | cmd_o.func[FNMSUB_D]
+           | cmd_o.func[FNMSUB_S]
+           | cmd_o.func[FSGNJ_D]
+           | cmd_o.func[FSGNJ_S]
+           | cmd_o.func[FSGNJN_D]
+           | cmd_o.func[FSGNJN_S]
+           | cmd_o.func[FSGNJX_D]
+           | cmd_o.func[FSGNJX_S]
+           | cmd_o.func[FSQRT_D]
+           | cmd_o.func[FSQRT_S]
+           | cmd_o.func[FSUB_D]
+           | cmd_o.func[FSUB_S];
+  end
 
   always_comb begin
     cmd_o.rd = '0;
@@ -461,156 +465,160 @@ module instr_decoder #(
     else if (is_frd) cmd_o.rd = {1'b1, rd};
   end
 
-  wor is_xrs1;
-  assign is_xrs1 = cmd_o.func[ADD];
-  assign is_xrs1 = cmd_o.func[ADDI];
-  assign is_xrs1 = cmd_o.func[ADDIW];
-  assign is_xrs1 = cmd_o.func[ADDW];
-  assign is_xrs1 = cmd_o.func[AMOADD_D];
-  assign is_xrs1 = cmd_o.func[AMOADD_W];
-  assign is_xrs1 = cmd_o.func[AMOAND_D];
-  assign is_xrs1 = cmd_o.func[AMOAND_W];
-  assign is_xrs1 = cmd_o.func[AMOMAX_D];
-  assign is_xrs1 = cmd_o.func[AMOMAX_W];
-  assign is_xrs1 = cmd_o.func[AMOMAXU_D];
-  assign is_xrs1 = cmd_o.func[AMOMAXU_W];
-  assign is_xrs1 = cmd_o.func[AMOMIN_D];
-  assign is_xrs1 = cmd_o.func[AMOMIN_W];
-  assign is_xrs1 = cmd_o.func[AMOMINU_D];
-  assign is_xrs1 = cmd_o.func[AMOMINU_W];
-  assign is_xrs1 = cmd_o.func[AMOOR_D];
-  assign is_xrs1 = cmd_o.func[AMOOR_W];
-  assign is_xrs1 = cmd_o.func[AMOSWAP_D];
-  assign is_xrs1 = cmd_o.func[AMOSWAP_W];
-  assign is_xrs1 = cmd_o.func[AMOXOR_D];
-  assign is_xrs1 = cmd_o.func[AMOXOR_W];
-  assign is_xrs1 = cmd_o.func[AND];
-  assign is_xrs1 = cmd_o.func[ANDI];
-  assign is_xrs1 = cmd_o.func[BEQ];
-  assign is_xrs1 = cmd_o.func[BGE];
-  assign is_xrs1 = cmd_o.func[BGEU];
-  assign is_xrs1 = cmd_o.func[BLT];
-  assign is_xrs1 = cmd_o.func[BLTU];
-  assign is_xrs1 = cmd_o.func[BNE];
-  assign is_xrs1 = cmd_o.func[CSRRC];
-  assign is_xrs1 = cmd_o.func[CSRRS];
-  assign is_xrs1 = cmd_o.func[CSRRW];
-  assign is_xrs1 = cmd_o.func[DIV];
-  assign is_xrs1 = cmd_o.func[DIVU];
-  assign is_xrs1 = cmd_o.func[DIVUW];
-  assign is_xrs1 = cmd_o.func[DIVW];
-  assign is_xrs1 = cmd_o.func[FCVT_D_L];
-  assign is_xrs1 = cmd_o.func[FCVT_D_LU];
-  assign is_xrs1 = cmd_o.func[FCVT_D_W];
-  assign is_xrs1 = cmd_o.func[FCVT_D_WU];
-  assign is_xrs1 = cmd_o.func[FCVT_S_L];
-  assign is_xrs1 = cmd_o.func[FCVT_S_LU];
-  assign is_xrs1 = cmd_o.func[FCVT_S_W];
-  assign is_xrs1 = cmd_o.func[FCVT_S_WU];
-  assign is_xrs1 = cmd_o.func[FENCE];
-  assign is_xrs1 = cmd_o.func[FLD];
-  assign is_xrs1 = cmd_o.func[FLW];
-  assign is_xrs1 = cmd_o.func[FMV_D_X];
-  assign is_xrs1 = cmd_o.func[FMV_W_X];
-  assign is_xrs1 = cmd_o.func[FSD];
-  assign is_xrs1 = cmd_o.func[FSW];
-  assign is_xrs1 = cmd_o.func[JALR];
-  assign is_xrs1 = cmd_o.func[LB];
-  assign is_xrs1 = cmd_o.func[LBU];
-  assign is_xrs1 = cmd_o.func[LD];
-  assign is_xrs1 = cmd_o.func[LH];
-  assign is_xrs1 = cmd_o.func[LHU];
-  assign is_xrs1 = cmd_o.func[LR_D];
-  assign is_xrs1 = cmd_o.func[LR_W];
-  assign is_xrs1 = cmd_o.func[LW];
-  assign is_xrs1 = cmd_o.func[LWU];
-  assign is_xrs1 = cmd_o.func[MUL];
-  assign is_xrs1 = cmd_o.func[MULH];
-  assign is_xrs1 = cmd_o.func[MULHSU];
-  assign is_xrs1 = cmd_o.func[MULHU];
-  assign is_xrs1 = cmd_o.func[MULW];
-  assign is_xrs1 = cmd_o.func[OR];
-  assign is_xrs1 = cmd_o.func[ORI];
-  assign is_xrs1 = cmd_o.func[REM];
-  assign is_xrs1 = cmd_o.func[REMU];
-  assign is_xrs1 = cmd_o.func[REMUW];
-  assign is_xrs1 = cmd_o.func[REMW];
-  assign is_xrs1 = cmd_o.func[SB];
-  assign is_xrs1 = cmd_o.func[SC_D];
-  assign is_xrs1 = cmd_o.func[SC_W];
-  assign is_xrs1 = cmd_o.func[SD];
-  assign is_xrs1 = cmd_o.func[SH];
-  assign is_xrs1 = cmd_o.func[SLL];
-  assign is_xrs1 = cmd_o.func[SLLI];
-  assign is_xrs1 = cmd_o.func[SLLIW];
-  assign is_xrs1 = cmd_o.func[SLLW];
-  assign is_xrs1 = cmd_o.func[SLT];
-  assign is_xrs1 = cmd_o.func[SLTI];
-  assign is_xrs1 = cmd_o.func[SLTIU];
-  assign is_xrs1 = cmd_o.func[SLTU];
-  assign is_xrs1 = cmd_o.func[SRA];
-  assign is_xrs1 = cmd_o.func[SRAI];
-  assign is_xrs1 = cmd_o.func[SRAIW];
-  assign is_xrs1 = cmd_o.func[SRAW];
-  assign is_xrs1 = cmd_o.func[SRL];
-  assign is_xrs1 = cmd_o.func[SRLI];
-  assign is_xrs1 = cmd_o.func[SRLIW];
-  assign is_xrs1 = cmd_o.func[SRLW];
-  assign is_xrs1 = cmd_o.func[SUB];
-  assign is_xrs1 = cmd_o.func[SUBW];
-  assign is_xrs1 = cmd_o.func[SW];
-  assign is_xrs1 = cmd_o.func[XOR];
-  assign is_xrs1 = cmd_o.func[XORI];
+  logic is_xrs1;
+  always_comb begin
+    is_xrs1 = cmd_o.func[ADD]
+            | cmd_o.func[ADDI]
+            | cmd_o.func[ADDIW]
+            | cmd_o.func[ADDW]
+            | cmd_o.func[AMOADD_D]
+            | cmd_o.func[AMOADD_W]
+            | cmd_o.func[AMOAND_D]
+            | cmd_o.func[AMOAND_W]
+            | cmd_o.func[AMOMAX_D]
+            | cmd_o.func[AMOMAX_W]
+            | cmd_o.func[AMOMAXU_D]
+            | cmd_o.func[AMOMAXU_W]
+            | cmd_o.func[AMOMIN_D]
+            | cmd_o.func[AMOMIN_W]
+            | cmd_o.func[AMOMINU_D]
+            | cmd_o.func[AMOMINU_W]
+            | cmd_o.func[AMOOR_D]
+            | cmd_o.func[AMOOR_W]
+            | cmd_o.func[AMOSWAP_D]
+            | cmd_o.func[AMOSWAP_W]
+            | cmd_o.func[AMOXOR_D]
+            | cmd_o.func[AMOXOR_W]
+            | cmd_o.func[AND]
+            | cmd_o.func[ANDI]
+            | cmd_o.func[BEQ]
+            | cmd_o.func[BGE]
+            | cmd_o.func[BGEU]
+            | cmd_o.func[BLT]
+            | cmd_o.func[BLTU]
+            | cmd_o.func[BNE]
+            | cmd_o.func[CSRRC]
+            | cmd_o.func[CSRRS]
+            | cmd_o.func[CSRRW]
+            | cmd_o.func[DIV]
+            | cmd_o.func[DIVU]
+            | cmd_o.func[DIVUW]
+            | cmd_o.func[DIVW]
+            | cmd_o.func[FCVT_D_L]
+            | cmd_o.func[FCVT_D_LU]
+            | cmd_o.func[FCVT_D_W]
+            | cmd_o.func[FCVT_D_WU]
+            | cmd_o.func[FCVT_S_L]
+            | cmd_o.func[FCVT_S_LU]
+            | cmd_o.func[FCVT_S_W]
+            | cmd_o.func[FCVT_S_WU]
+            | cmd_o.func[FENCE]
+            | cmd_o.func[FLD]
+            | cmd_o.func[FLW]
+            | cmd_o.func[FMV_D_X]
+            | cmd_o.func[FMV_W_X]
+            | cmd_o.func[FSD]
+            | cmd_o.func[FSW]
+            | cmd_o.func[JALR]
+            | cmd_o.func[LB]
+            | cmd_o.func[LBU]
+            | cmd_o.func[LD]
+            | cmd_o.func[LH]
+            | cmd_o.func[LHU]
+            | cmd_o.func[LR_D]
+            | cmd_o.func[LR_W]
+            | cmd_o.func[LW]
+            | cmd_o.func[LWU]
+            | cmd_o.func[MUL]
+            | cmd_o.func[MULH]
+            | cmd_o.func[MULHSU]
+            | cmd_o.func[MULHU]
+            | cmd_o.func[MULW]
+            | cmd_o.func[OR]
+            | cmd_o.func[ORI]
+            | cmd_o.func[REM]
+            | cmd_o.func[REMU]
+            | cmd_o.func[REMUW]
+            | cmd_o.func[REMW]
+            | cmd_o.func[SB]
+            | cmd_o.func[SC_D]
+            | cmd_o.func[SC_W]
+            | cmd_o.func[SD]
+            | cmd_o.func[SH]
+            | cmd_o.func[SLL]
+            | cmd_o.func[SLLI]
+            | cmd_o.func[SLLIW]
+            | cmd_o.func[SLLW]
+            | cmd_o.func[SLT]
+            | cmd_o.func[SLTI]
+            | cmd_o.func[SLTIU]
+            | cmd_o.func[SLTU]
+            | cmd_o.func[SRA]
+            | cmd_o.func[SRAI]
+            | cmd_o.func[SRAIW]
+            | cmd_o.func[SRAW]
+            | cmd_o.func[SRL]
+            | cmd_o.func[SRLI]
+            | cmd_o.func[SRLIW]
+            | cmd_o.func[SRLW]
+            | cmd_o.func[SUB]
+            | cmd_o.func[SUBW]
+            | cmd_o.func[SW]
+            | cmd_o.func[XOR]
+            | cmd_o.func[XORI];
+  end
 
-  wor is_frs1;
-  assign is_frs1 = cmd_o.func[FADD_D];
-  assign is_frs1 = cmd_o.func[FADD_S];
-  assign is_frs1 = cmd_o.func[FCLASS_D];
-  assign is_frs1 = cmd_o.func[FCLASS_S];
-  assign is_frs1 = cmd_o.func[FCVT_D_S];
-  assign is_frs1 = cmd_o.func[FCVT_L_D];
-  assign is_frs1 = cmd_o.func[FCVT_L_S];
-  assign is_frs1 = cmd_o.func[FCVT_LU_D];
-  assign is_frs1 = cmd_o.func[FCVT_LU_S];
-  assign is_frs1 = cmd_o.func[FCVT_S_D];
-  assign is_frs1 = cmd_o.func[FCVT_W_D];
-  assign is_frs1 = cmd_o.func[FCVT_W_S];
-  assign is_frs1 = cmd_o.func[FCVT_WU_D];
-  assign is_frs1 = cmd_o.func[FCVT_WU_S];
-  assign is_frs1 = cmd_o.func[FDIV_D];
-  assign is_frs1 = cmd_o.func[FDIV_S];
-  assign is_frs1 = cmd_o.func[FEQ_D];
-  assign is_frs1 = cmd_o.func[FEQ_S];
-  assign is_frs1 = cmd_o.func[FLE_D];
-  assign is_frs1 = cmd_o.func[FLE_S];
-  assign is_frs1 = cmd_o.func[FLT_D];
-  assign is_frs1 = cmd_o.func[FLT_S];
-  assign is_frs1 = cmd_o.func[FMADD_D];
-  assign is_frs1 = cmd_o.func[FMADD_S];
-  assign is_frs1 = cmd_o.func[FMAX_D];
-  assign is_frs1 = cmd_o.func[FMAX_S];
-  assign is_frs1 = cmd_o.func[FMIN_D];
-  assign is_frs1 = cmd_o.func[FMIN_S];
-  assign is_frs1 = cmd_o.func[FMSUB_D];
-  assign is_frs1 = cmd_o.func[FMSUB_S];
-  assign is_frs1 = cmd_o.func[FMUL_D];
-  assign is_frs1 = cmd_o.func[FMUL_S];
-  assign is_frs1 = cmd_o.func[FMV_X_D];
-  assign is_frs1 = cmd_o.func[FMV_X_W];
-  assign is_frs1 = cmd_o.func[FNMADD_D];
-  assign is_frs1 = cmd_o.func[FNMADD_S];
-  assign is_frs1 = cmd_o.func[FNMSUB_D];
-  assign is_frs1 = cmd_o.func[FNMSUB_S];
-  assign is_frs1 = cmd_o.func[FSGNJ_D];
-  assign is_frs1 = cmd_o.func[FSGNJ_S];
-  assign is_frs1 = cmd_o.func[FSGNJN_D];
-  assign is_frs1 = cmd_o.func[FSGNJN_S];
-  assign is_frs1 = cmd_o.func[FSGNJX_D];
-  assign is_frs1 = cmd_o.func[FSGNJX_S];
-  assign is_frs1 = cmd_o.func[FSQRT_D];
-  assign is_frs1 = cmd_o.func[FSQRT_S];
-  assign is_frs1 = cmd_o.func[FSUB_D];
-  assign is_frs1 = cmd_o.func[FSUB_S];
+  logic is_frs1;
+  always_comb begin
+    is_frs1 = cmd_o.func[FADD_D]
+            | cmd_o.func[FADD_S]
+            | cmd_o.func[FCLASS_D]
+            | cmd_o.func[FCLASS_S]
+            | cmd_o.func[FCVT_D_S]
+            | cmd_o.func[FCVT_L_D]
+            | cmd_o.func[FCVT_L_S]
+            | cmd_o.func[FCVT_LU_D]
+            | cmd_o.func[FCVT_LU_S]
+            | cmd_o.func[FCVT_S_D]
+            | cmd_o.func[FCVT_W_D]
+            | cmd_o.func[FCVT_W_S]
+            | cmd_o.func[FCVT_WU_D]
+            | cmd_o.func[FCVT_WU_S]
+            | cmd_o.func[FDIV_D]
+            | cmd_o.func[FDIV_S]
+            | cmd_o.func[FEQ_D]
+            | cmd_o.func[FEQ_S]
+            | cmd_o.func[FLE_D]
+            | cmd_o.func[FLE_S]
+            | cmd_o.func[FLT_D]
+            | cmd_o.func[FLT_S]
+            | cmd_o.func[FMADD_D]
+            | cmd_o.func[FMADD_S]
+            | cmd_o.func[FMAX_D]
+            | cmd_o.func[FMAX_S]
+            | cmd_o.func[FMIN_D]
+            | cmd_o.func[FMIN_S]
+            | cmd_o.func[FMSUB_D]
+            | cmd_o.func[FMSUB_S]
+            | cmd_o.func[FMUL_D]
+            | cmd_o.func[FMUL_S]
+            | cmd_o.func[FMV_X_D]
+            | cmd_o.func[FMV_X_W]
+            | cmd_o.func[FNMADD_D]
+            | cmd_o.func[FNMADD_S]
+            | cmd_o.func[FNMSUB_D]
+            | cmd_o.func[FNMSUB_S]
+            | cmd_o.func[FSGNJ_D]
+            | cmd_o.func[FSGNJ_S]
+            | cmd_o.func[FSGNJN_D]
+            | cmd_o.func[FSGNJN_S]
+            | cmd_o.func[FSGNJX_D]
+            | cmd_o.func[FSGNJX_S]
+            | cmd_o.func[FSQRT_D]
+            | cmd_o.func[FSQRT_S]
+            | cmd_o.func[FSUB_D]
+            | cmd_o.func[FSUB_S];
+  end
 
   always_comb begin
     cmd_o.rs1 = '0;
@@ -618,101 +626,105 @@ module instr_decoder #(
     else if (is_frs1) cmd_o.rs1 = {1'b1, rs1};
   end
 
-  wor is_xrs2;
-  assign is_xrs2 = cmd_o.func[ADD];
-  assign is_xrs2 = cmd_o.func[ADDW];
-  assign is_xrs2 = cmd_o.func[AMOADD_D];
-  assign is_xrs2 = cmd_o.func[AMOADD_W];
-  assign is_xrs2 = cmd_o.func[AMOAND_D];
-  assign is_xrs2 = cmd_o.func[AMOAND_W];
-  assign is_xrs2 = cmd_o.func[AMOMAX_D];
-  assign is_xrs2 = cmd_o.func[AMOMAX_W];
-  assign is_xrs2 = cmd_o.func[AMOMAXU_D];
-  assign is_xrs2 = cmd_o.func[AMOMAXU_W];
-  assign is_xrs2 = cmd_o.func[AMOMIN_D];
-  assign is_xrs2 = cmd_o.func[AMOMIN_W];
-  assign is_xrs2 = cmd_o.func[AMOMINU_D];
-  assign is_xrs2 = cmd_o.func[AMOMINU_W];
-  assign is_xrs2 = cmd_o.func[AMOOR_D];
-  assign is_xrs2 = cmd_o.func[AMOOR_W];
-  assign is_xrs2 = cmd_o.func[AMOSWAP_D];
-  assign is_xrs2 = cmd_o.func[AMOSWAP_W];
-  assign is_xrs2 = cmd_o.func[AMOXOR_D];
-  assign is_xrs2 = cmd_o.func[AMOXOR_W];
-  assign is_xrs2 = cmd_o.func[AND];
-  assign is_xrs2 = cmd_o.func[BEQ];
-  assign is_xrs2 = cmd_o.func[BGE];
-  assign is_xrs2 = cmd_o.func[BGEU];
-  assign is_xrs2 = cmd_o.func[BLT];
-  assign is_xrs2 = cmd_o.func[BLTU];
-  assign is_xrs2 = cmd_o.func[BNE];
-  assign is_xrs2 = cmd_o.func[DIV];
-  assign is_xrs2 = cmd_o.func[DIVU];
-  assign is_xrs2 = cmd_o.func[DIVUW];
-  assign is_xrs2 = cmd_o.func[DIVW];
-  assign is_xrs2 = cmd_o.func[MUL];
-  assign is_xrs2 = cmd_o.func[MULH];
-  assign is_xrs2 = cmd_o.func[MULHSU];
-  assign is_xrs2 = cmd_o.func[MULHU];
-  assign is_xrs2 = cmd_o.func[MULW];
-  assign is_xrs2 = cmd_o.func[OR];
-  assign is_xrs2 = cmd_o.func[REM];
-  assign is_xrs2 = cmd_o.func[REMU];
-  assign is_xrs2 = cmd_o.func[REMUW];
-  assign is_xrs2 = cmd_o.func[REMW];
-  assign is_xrs2 = cmd_o.func[SB];
-  assign is_xrs2 = cmd_o.func[SC_D];
-  assign is_xrs2 = cmd_o.func[SC_W];
-  assign is_xrs2 = cmd_o.func[SD];
-  assign is_xrs2 = cmd_o.func[SH];
-  assign is_xrs2 = cmd_o.func[SLL];
-  assign is_xrs2 = cmd_o.func[SLLW];
-  assign is_xrs2 = cmd_o.func[SLT];
-  assign is_xrs2 = cmd_o.func[SLTU];
-  assign is_xrs2 = cmd_o.func[SRA];
-  assign is_xrs2 = cmd_o.func[SRAW];
-  assign is_xrs2 = cmd_o.func[SRL];
-  assign is_xrs2 = cmd_o.func[SRLW];
-  assign is_xrs2 = cmd_o.func[SUB];
-  assign is_xrs2 = cmd_o.func[SUBW];
-  assign is_xrs2 = cmd_o.func[SW];
-  assign is_xrs2 = cmd_o.func[XOR];
+  logic is_xrs2;
+  always_comb begin
+    is_xrs2 = cmd_o.func[ADD]
+            | cmd_o.func[ADDW]
+            | cmd_o.func[AMOADD_D]
+            | cmd_o.func[AMOADD_W]
+            | cmd_o.func[AMOAND_D]
+            | cmd_o.func[AMOAND_W]
+            | cmd_o.func[AMOMAX_D]
+            | cmd_o.func[AMOMAX_W]
+            | cmd_o.func[AMOMAXU_D]
+            | cmd_o.func[AMOMAXU_W]
+            | cmd_o.func[AMOMIN_D]
+            | cmd_o.func[AMOMIN_W]
+            | cmd_o.func[AMOMINU_D]
+            | cmd_o.func[AMOMINU_W]
+            | cmd_o.func[AMOOR_D]
+            | cmd_o.func[AMOOR_W]
+            | cmd_o.func[AMOSWAP_D]
+            | cmd_o.func[AMOSWAP_W]
+            | cmd_o.func[AMOXOR_D]
+            | cmd_o.func[AMOXOR_W]
+            | cmd_o.func[AND]
+            | cmd_o.func[BEQ]
+            | cmd_o.func[BGE]
+            | cmd_o.func[BGEU]
+            | cmd_o.func[BLT]
+            | cmd_o.func[BLTU]
+            | cmd_o.func[BNE]
+            | cmd_o.func[DIV]
+            | cmd_o.func[DIVU]
+            | cmd_o.func[DIVUW]
+            | cmd_o.func[DIVW]
+            | cmd_o.func[MUL]
+            | cmd_o.func[MULH]
+            | cmd_o.func[MULHSU]
+            | cmd_o.func[MULHU]
+            | cmd_o.func[MULW]
+            | cmd_o.func[OR]
+            | cmd_o.func[REM]
+            | cmd_o.func[REMU]
+            | cmd_o.func[REMUW]
+            | cmd_o.func[REMW]
+            | cmd_o.func[SB]
+            | cmd_o.func[SC_D]
+            | cmd_o.func[SC_W]
+            | cmd_o.func[SD]
+            | cmd_o.func[SH]
+            | cmd_o.func[SLL]
+            | cmd_o.func[SLLW]
+            | cmd_o.func[SLT]
+            | cmd_o.func[SLTU]
+            | cmd_o.func[SRA]
+            | cmd_o.func[SRAW]
+            | cmd_o.func[SRL]
+            | cmd_o.func[SRLW]
+            | cmd_o.func[SUB]
+            | cmd_o.func[SUBW]
+            | cmd_o.func[SW]
+            | cmd_o.func[XOR];
+  end
 
-  wor is_frs2;
-  assign is_frs2 = cmd_o.func[FADD_D];
-  assign is_frs2 = cmd_o.func[FADD_S];
-  assign is_frs2 = cmd_o.func[FDIV_D];
-  assign is_frs2 = cmd_o.func[FDIV_S];
-  assign is_frs2 = cmd_o.func[FEQ_D];
-  assign is_frs2 = cmd_o.func[FEQ_S];
-  assign is_frs2 = cmd_o.func[FLE_D];
-  assign is_frs2 = cmd_o.func[FLE_S];
-  assign is_frs2 = cmd_o.func[FLT_D];
-  assign is_frs2 = cmd_o.func[FLT_S];
-  assign is_frs2 = cmd_o.func[FSW];
-  assign is_frs2 = cmd_o.func[FSD];
-  assign is_frs2 = cmd_o.func[FMADD_D];
-  assign is_frs2 = cmd_o.func[FMADD_S];
-  assign is_frs2 = cmd_o.func[FMAX_D];
-  assign is_frs2 = cmd_o.func[FMAX_S];
-  assign is_frs2 = cmd_o.func[FMIN_D];
-  assign is_frs2 = cmd_o.func[FMIN_S];
-  assign is_frs2 = cmd_o.func[FMSUB_D];
-  assign is_frs2 = cmd_o.func[FMSUB_S];
-  assign is_frs2 = cmd_o.func[FMUL_D];
-  assign is_frs2 = cmd_o.func[FMUL_S];
-  assign is_frs2 = cmd_o.func[FNMADD_D];
-  assign is_frs2 = cmd_o.func[FNMADD_S];
-  assign is_frs2 = cmd_o.func[FNMSUB_D];
-  assign is_frs2 = cmd_o.func[FNMSUB_S];
-  assign is_frs2 = cmd_o.func[FSGNJ_D];
-  assign is_frs2 = cmd_o.func[FSGNJ_S];
-  assign is_frs2 = cmd_o.func[FSGNJN_D];
-  assign is_frs2 = cmd_o.func[FSGNJN_S];
-  assign is_frs2 = cmd_o.func[FSGNJX_D];
-  assign is_frs2 = cmd_o.func[FSGNJX_S];
-  assign is_frs2 = cmd_o.func[FSUB_D];
-  assign is_frs2 = cmd_o.func[FSUB_S];
+  logic is_frs2;
+  always_comb begin
+    is_frs2 = cmd_o.func[FADD_D]
+            | cmd_o.func[FADD_S]
+            | cmd_o.func[FDIV_D]
+            | cmd_o.func[FDIV_S]
+            | cmd_o.func[FEQ_D]
+            | cmd_o.func[FEQ_S]
+            | cmd_o.func[FLE_D]
+            | cmd_o.func[FLE_S]
+            | cmd_o.func[FLT_D]
+            | cmd_o.func[FLT_S]
+            | cmd_o.func[FSW]
+            | cmd_o.func[FSD]
+            | cmd_o.func[FMADD_D]
+            | cmd_o.func[FMADD_S]
+            | cmd_o.func[FMAX_D]
+            | cmd_o.func[FMAX_S]
+            | cmd_o.func[FMIN_D]
+            | cmd_o.func[FMIN_S]
+            | cmd_o.func[FMSUB_D]
+            | cmd_o.func[FMSUB_S]
+            | cmd_o.func[FMUL_D]
+            | cmd_o.func[FMUL_S]
+            | cmd_o.func[FNMADD_D]
+            | cmd_o.func[FNMADD_S]
+            | cmd_o.func[FNMSUB_D]
+            | cmd_o.func[FNMSUB_S]
+            | cmd_o.func[FSGNJ_D]
+            | cmd_o.func[FSGNJ_S]
+            | cmd_o.func[FSGNJN_D]
+            | cmd_o.func[FSGNJN_S]
+            | cmd_o.func[FSGNJX_D]
+            | cmd_o.func[FSGNJX_S]
+            | cmd_o.func[FSUB_D]
+            | cmd_o.func[FSUB_S];
+  end
 
   always_comb begin
     cmd_o.rs2 = '0;
@@ -720,137 +732,157 @@ module instr_decoder #(
     else if (is_frs2) cmd_o.rs2 = {1'b1, rs2};
   end
 
-  wor is_frs3;
-  assign is_frs3 = cmd_o.func[FMADD_D];
-  assign is_frs3 = cmd_o.func[FMADD_S];
-  assign is_frs3 = cmd_o.func[FMSUB_D];
-  assign is_frs3 = cmd_o.func[FMSUB_S];
-  assign is_frs3 = cmd_o.func[FNMADD_D];
-  assign is_frs3 = cmd_o.func[FNMADD_S];
-  assign is_frs3 = cmd_o.func[FNMSUB_D];
-  assign is_frs3 = cmd_o.func[FNMSUB_S];
+  logic is_frs3;
+  always_comb begin
+    is_frs3 = cmd_o.func[FMADD_D]
+            | cmd_o.func[FMADD_S]
+            | cmd_o.func[FMSUB_D]
+            | cmd_o.func[FMSUB_S]
+            | cmd_o.func[FNMADD_D]
+            | cmd_o.func[FNMADD_S]
+            | cmd_o.func[FNMSUB_D]
+            | cmd_o.func[FNMSUB_S];
+  end
+
   always_comb cmd_o.rs3 = is_frs3 ? {1'b1, rs3} : '0;
 
-  wor is_aimm;
-  assign is_aimm = cmd_o.func[SLLI];
-  assign is_aimm = cmd_o.func[SLLIW];
-  assign is_aimm = cmd_o.func[SRAI];
-  assign is_aimm = cmd_o.func[SRAIW];
-  assign is_aimm = cmd_o.func[SRLI];
-  assign is_aimm = cmd_o.func[SRLIW];
+  logic is_aimm;
+  always_comb begin
 
-  wor is_bimm;
-  assign is_bimm = cmd_o.func[BEQ];
-  assign is_bimm = cmd_o.func[BGE];
-  assign is_bimm = cmd_o.func[BGEU];
-  assign is_bimm = cmd_o.func[BLT];
-  assign is_bimm = cmd_o.func[BLTU];
-  assign is_bimm = cmd_o.func[BNE];
+    is_aimm = cmd_o.func[SLLI]
+            | cmd_o.func[SLLIW]
+            | cmd_o.func[SRAI]
+            | cmd_o.func[SRAIW]
+            | cmd_o.func[SRLI]
+            | cmd_o.func[SRLIW];
+  end
 
-  wor is_cimm;
-  assign is_cimm = cmd_o.func[CSRRCI];
-  assign is_cimm = cmd_o.func[CSRRSI];
-  assign is_cimm = cmd_o.func[CSRRWI];
+  logic is_bimm;
+  always_comb begin
 
-  wor is_iimm;
-  assign is_iimm = cmd_o.func[ADDI];
-  assign is_iimm = cmd_o.func[ADDIW];
-  assign is_iimm = cmd_o.func[ANDI];
-  assign is_iimm = cmd_o.func[CSRRC];
-  assign is_iimm = cmd_o.func[CSRRS];
-  assign is_iimm = cmd_o.func[CSRRW];
-  assign is_iimm = cmd_o.func[FENCE];
-  assign is_iimm = cmd_o.func[FLD];
-  assign is_iimm = cmd_o.func[FLW];
-  assign is_iimm = cmd_o.func[JALR];
-  assign is_iimm = cmd_o.func[LB];
-  assign is_iimm = cmd_o.func[LBU];
-  assign is_iimm = cmd_o.func[LD];
-  assign is_iimm = cmd_o.func[LH];
-  assign is_iimm = cmd_o.func[LHU];
-  assign is_iimm = cmd_o.func[LW];
-  assign is_iimm = cmd_o.func[LWU];
-  assign is_iimm = cmd_o.func[ORI];
-  assign is_iimm = cmd_o.func[SLTI];
-  assign is_iimm = cmd_o.func[SLTIU];
-  assign is_iimm = cmd_o.func[XORI];
+    is_bimm = cmd_o.func[BEQ]
+            | cmd_o.func[BGE]
+            | cmd_o.func[BGEU]
+            | cmd_o.func[BLT]
+            | cmd_o.func[BLTU]
+            | cmd_o.func[BNE];
+  end
 
-  wor is_jimm;
-  assign is_jimm = cmd_o.func[JAL];
+  logic is_cimm;
+  always_comb begin
+    is_cimm = cmd_o.func[CSRRCI] | cmd_o.func[CSRRSI] | cmd_o.func[CSRRWI];
+  end
 
-  wor is_rimm;
-  assign is_rimm = cmd_o.func[FADD_D];
-  assign is_rimm = cmd_o.func[FADD_S];
-  assign is_rimm = cmd_o.func[FCVT_D_L];
-  assign is_rimm = cmd_o.func[FCVT_D_LU];
-  assign is_rimm = cmd_o.func[FCVT_D_S];
-  assign is_rimm = cmd_o.func[FCVT_D_W];
-  assign is_rimm = cmd_o.func[FCVT_D_WU];
-  assign is_rimm = cmd_o.func[FCVT_L_D];
-  assign is_rimm = cmd_o.func[FCVT_L_S];
-  assign is_rimm = cmd_o.func[FCVT_LU_D];
-  assign is_rimm = cmd_o.func[FCVT_LU_S];
-  assign is_rimm = cmd_o.func[FCVT_S_D];
-  assign is_rimm = cmd_o.func[FCVT_S_L];
-  assign is_rimm = cmd_o.func[FCVT_S_LU];
-  assign is_rimm = cmd_o.func[FCVT_S_W];
-  assign is_rimm = cmd_o.func[FCVT_S_WU];
-  assign is_rimm = cmd_o.func[FCVT_W_D];
-  assign is_rimm = cmd_o.func[FCVT_W_S];
-  assign is_rimm = cmd_o.func[FCVT_WU_D];
-  assign is_rimm = cmd_o.func[FCVT_WU_S];
-  assign is_rimm = cmd_o.func[FDIV_D];
-  assign is_rimm = cmd_o.func[FDIV_S];
-  assign is_rimm = cmd_o.func[FMADD_D];
-  assign is_rimm = cmd_o.func[FMADD_S];
-  assign is_rimm = cmd_o.func[FMSUB_D];
-  assign is_rimm = cmd_o.func[FMSUB_S];
-  assign is_rimm = cmd_o.func[FMUL_D];
-  assign is_rimm = cmd_o.func[FMUL_S];
-  assign is_rimm = cmd_o.func[FNMADD_D];
-  assign is_rimm = cmd_o.func[FNMADD_S];
-  assign is_rimm = cmd_o.func[FNMSUB_D];
-  assign is_rimm = cmd_o.func[FNMSUB_S];
-  assign is_rimm = cmd_o.func[FSQRT_D];
-  assign is_rimm = cmd_o.func[FSQRT_S];
-  assign is_rimm = cmd_o.func[FSUB_D];
-  assign is_rimm = cmd_o.func[FSUB_S];
+  logic is_iimm;
+  always_comb begin
+    is_iimm = cmd_o.func[ADDI]
+            | cmd_o.func[ADDIW]
+            | cmd_o.func[ANDI]
+            | cmd_o.func[CSRRC]
+            | cmd_o.func[CSRRS]
+            | cmd_o.func[CSRRW]
+            | cmd_o.func[FENCE]
+            | cmd_o.func[FLD]
+            | cmd_o.func[FLW]
+            | cmd_o.func[JALR]
+            | cmd_o.func[LB]
+            | cmd_o.func[LBU]
+            | cmd_o.func[LD]
+            | cmd_o.func[LH]
+            | cmd_o.func[LHU]
+            | cmd_o.func[LW]
+            | cmd_o.func[LWU]
+            | cmd_o.func[ORI]
+            | cmd_o.func[SLTI]
+            | cmd_o.func[SLTIU]
+            | cmd_o.func[XORI];
+  end
 
-  wor is_simm;
-  assign is_simm = cmd_o.func[FSD];
-  assign is_simm = cmd_o.func[FSW];
-  assign is_simm = cmd_o.func[SB];
-  assign is_simm = cmd_o.func[SD];
-  assign is_simm = cmd_o.func[SH];
-  assign is_simm = cmd_o.func[SW];
+  logic is_jimm;
+  always_comb begin
+    is_jimm = cmd_o.func[JAL];
+  end
 
-  wor is_timm;
-  assign is_timm = cmd_o.func[AMOADD_D];
-  assign is_timm = cmd_o.func[AMOADD_W];
-  assign is_timm = cmd_o.func[AMOAND_D];
-  assign is_timm = cmd_o.func[AMOAND_W];
-  assign is_timm = cmd_o.func[AMOMAX_D];
-  assign is_timm = cmd_o.func[AMOMAX_W];
-  assign is_timm = cmd_o.func[AMOMAXU_D];
-  assign is_timm = cmd_o.func[AMOMAXU_W];
-  assign is_timm = cmd_o.func[AMOMIN_D];
-  assign is_timm = cmd_o.func[AMOMIN_W];
-  assign is_timm = cmd_o.func[AMOMINU_D];
-  assign is_timm = cmd_o.func[AMOMINU_W];
-  assign is_timm = cmd_o.func[AMOOR_D];
-  assign is_timm = cmd_o.func[AMOOR_W];
-  assign is_timm = cmd_o.func[AMOSWAP_D];
-  assign is_timm = cmd_o.func[AMOSWAP_W];
-  assign is_timm = cmd_o.func[AMOXOR_D];
-  assign is_timm = cmd_o.func[AMOXOR_W];
-  assign is_timm = cmd_o.func[LR_D];
-  assign is_timm = cmd_o.func[LR_W];
-  assign is_timm = cmd_o.func[SC_D];
-  assign is_timm = cmd_o.func[SC_W];
+  logic is_rimm;
+  always_comb begin
+    is_rimm = cmd_o.func[FADD_D]
+            | cmd_o.func[FADD_S]
+            | cmd_o.func[FCVT_D_L]
+            | cmd_o.func[FCVT_D_LU]
+            | cmd_o.func[FCVT_D_S]
+            | cmd_o.func[FCVT_D_W]
+            | cmd_o.func[FCVT_D_WU]
+            | cmd_o.func[FCVT_L_D]
+            | cmd_o.func[FCVT_L_S]
+            | cmd_o.func[FCVT_LU_D]
+            | cmd_o.func[FCVT_LU_S]
+            | cmd_o.func[FCVT_S_D]
+            | cmd_o.func[FCVT_S_L]
+            | cmd_o.func[FCVT_S_LU]
+            | cmd_o.func[FCVT_S_W]
+            | cmd_o.func[FCVT_S_WU]
+            | cmd_o.func[FCVT_W_D]
+            | cmd_o.func[FCVT_W_S]
+            | cmd_o.func[FCVT_WU_D]
+            | cmd_o.func[FCVT_WU_S]
+            | cmd_o.func[FDIV_D]
+            | cmd_o.func[FDIV_S]
+            | cmd_o.func[FMADD_D]
+            | cmd_o.func[FMADD_S]
+            | cmd_o.func[FMSUB_D]
+            | cmd_o.func[FMSUB_S]
+            | cmd_o.func[FMUL_D]
+            | cmd_o.func[FMUL_S]
+            | cmd_o.func[FNMADD_D]
+            | cmd_o.func[FNMADD_S]
+            | cmd_o.func[FNMSUB_D]
+            | cmd_o.func[FNMSUB_S]
+            | cmd_o.func[FSQRT_D]
+            | cmd_o.func[FSQRT_S]
+            | cmd_o.func[FSUB_D]
+            | cmd_o.func[FSUB_S];
+  end
 
-  wor is_uimm;
-  assign is_uimm = cmd_o.func[AUIPC];
-  assign is_uimm = cmd_o.func[LUI];
+  logic is_simm;
+  always_comb begin
+    is_simm = cmd_o.func[FSD]
+            | cmd_o.func[FSW]
+            | cmd_o.func[SB]
+            | cmd_o.func[SD]
+            | cmd_o.func[SH]
+            | cmd_o.func[SW];
+  end
+
+  logic is_timm;
+  always_comb begin
+    is_timm = cmd_o.func[AMOADD_D]
+            | cmd_o.func[AMOADD_W]
+            | cmd_o.func[AMOAND_D]
+            | cmd_o.func[AMOAND_W]
+            | cmd_o.func[AMOMAX_D]
+            | cmd_o.func[AMOMAX_W]
+            | cmd_o.func[AMOMAXU_D]
+            | cmd_o.func[AMOMAXU_W]
+            | cmd_o.func[AMOMIN_D]
+            | cmd_o.func[AMOMIN_W]
+            | cmd_o.func[AMOMINU_D]
+            | cmd_o.func[AMOMINU_W]
+            | cmd_o.func[AMOOR_D]
+            | cmd_o.func[AMOOR_W]
+            | cmd_o.func[AMOSWAP_D]
+            | cmd_o.func[AMOSWAP_W]
+            | cmd_o.func[AMOXOR_D]
+            | cmd_o.func[AMOXOR_W]
+            | cmd_o.func[LR_D]
+            | cmd_o.func[LR_W]
+            | cmd_o.func[SC_D]
+            | cmd_o.func[SC_W];
+  end
+
+  logic is_uimm;
+  always_comb begin
+    is_uimm = cmd_o.func[AUIPC] | cmd_o.func[LUI];
+  end
 
   always_comb begin
     if (is_aimm) cmd_o.imm = aimm;
@@ -867,65 +899,59 @@ module instr_decoder #(
 
   always_comb cmd_o.pc = pc_i;
 
-  wor is_mem_op;
-  assign is_mem_op = cmd_o.func[LB];
-  assign is_mem_op = cmd_o.func[LBU];
-  assign is_mem_op = cmd_o.func[LH];
-  assign is_mem_op = cmd_o.func[LHU];
-  assign is_mem_op = cmd_o.func[LW];
-  assign is_mem_op = cmd_o.func[LWU];
-  assign is_mem_op = cmd_o.func[LD];
-  assign is_mem_op = cmd_o.func[SB];
-  assign is_mem_op = cmd_o.func[SH];
-  assign is_mem_op = cmd_o.func[SW];
-  assign is_mem_op = cmd_o.func[SD];
-  assign is_mem_op = cmd_o.func[FLW];
-  assign is_mem_op = cmd_o.func[FSW];
-  assign is_mem_op = cmd_o.func[SD];
-  assign is_mem_op = cmd_o.func[FLD];
-  assign is_mem_op = cmd_o.func[FSD];
-  assign is_mem_op = cmd_o.func[LR_W];
-  assign is_mem_op = cmd_o.func[SC_W];
-  assign is_mem_op = cmd_o.func[AMOSWAP_W];
-  assign is_mem_op = cmd_o.func[AMOADD_W];
-  assign is_mem_op = cmd_o.func[AMOXOR_W];
-  assign is_mem_op = cmd_o.func[AMOAND_W];
-  assign is_mem_op = cmd_o.func[AMOOR_W];
-  assign is_mem_op = cmd_o.func[AMOMIN_W];
-  assign is_mem_op = cmd_o.func[AMOMAX_W];
-  assign is_mem_op = cmd_o.func[AMOMINU_W];
-  assign is_mem_op = cmd_o.func[AMOMAXU_W];
-  assign is_mem_op = cmd_o.func[LR_D];
-  assign is_mem_op = cmd_o.func[SC_D];
-  assign is_mem_op = cmd_o.func[AMOSWAP_D];
-  assign is_mem_op = cmd_o.func[AMOADD_D];
-  assign is_mem_op = cmd_o.func[AMOXOR_D];
-  assign is_mem_op = cmd_o.func[AMOAND_D];
-  assign is_mem_op = cmd_o.func[AMOOR_D];
-  assign is_mem_op = cmd_o.func[AMOMIN_D];
-  assign is_mem_op = cmd_o.func[AMOMAX_D];
-  assign is_mem_op = cmd_o.func[AMOMINU_D];
-  assign is_mem_op = cmd_o.func[AMOMAXU_D];
-
   always_comb begin
-    cmd_o.mem_op = is_mem_op;
+    cmd_o.mem_op = cmd_o.func[LB]
+                 | cmd_o.func[LBU]
+                 | cmd_o.func[LH]
+                 | cmd_o.func[LHU]
+                 | cmd_o.func[LW]
+                 | cmd_o.func[LWU]
+                 | cmd_o.func[LD]
+                 | cmd_o.func[SB]
+                 | cmd_o.func[SH]
+                 | cmd_o.func[SW]
+                 | cmd_o.func[SD]
+                 | cmd_o.func[FLW]
+                 | cmd_o.func[FSW]
+                 | cmd_o.func[SD]
+                 | cmd_o.func[FLD]
+                 | cmd_o.func[FSD]
+                 | cmd_o.func[LR_W]
+                 | cmd_o.func[SC_W]
+                 | cmd_o.func[AMOSWAP_W]
+                 | cmd_o.func[AMOADD_W]
+                 | cmd_o.func[AMOXOR_W]
+                 | cmd_o.func[AMOAND_W]
+                 | cmd_o.func[AMOOR_W]
+                 | cmd_o.func[AMOMIN_W]
+                 | cmd_o.func[AMOMAX_W]
+                 | cmd_o.func[AMOMINU_W]
+                 | cmd_o.func[AMOMAXU_W]
+                 | cmd_o.func[LR_D]
+                 | cmd_o.func[SC_D]
+                 | cmd_o.func[AMOSWAP_D]
+                 | cmd_o.func[AMOADD_D]
+                 | cmd_o.func[AMOXOR_D]
+                 | cmd_o.func[AMOAND_D]
+                 | cmd_o.func[AMOOR_D]
+                 | cmd_o.func[AMOMIN_D]
+                 | cmd_o.func[AMOMAX_D]
+                 | cmd_o.func[AMOMINU_D]
+                 | cmd_o.func[AMOMAXU_D];
   end
 
-  wor is_blocking;
-  assign is_blocking = cmd_o.func[BEQ];
-  assign is_blocking = cmd_o.func[BGE];
-  assign is_blocking = cmd_o.func[BGEU];
-  assign is_blocking = cmd_o.func[BLT];
-  assign is_blocking = cmd_o.func[BLTU];
-  assign is_blocking = cmd_o.func[BNE];
-  assign is_blocking = cmd_o.func[JAL];
-  assign is_blocking = cmd_o.func[JALR];
-  assign is_blocking = cmd_o.func[FENCE];
-  assign is_blocking = cmd_o.func[MRET];
-  assign is_blocking = cmd_o.func[WFI];
-
   always_comb begin
-    cmd_o.blocking = is_blocking;
+    cmd_o.blocking = cmd_o.func[BEQ]
+                   | cmd_o.func[BGE]
+                   | cmd_o.func[BGEU]
+                   | cmd_o.func[BLT]
+                   | cmd_o.func[BLTU]
+                   | cmd_o.func[BNE]
+                   | cmd_o.func[JAL]
+                   | cmd_o.func[JALR]
+                   | cmd_o.func[FENCE]
+                   | cmd_o.func[MRET]
+                   | cmd_o.func[WFI];
   end
 
   always_comb begin
