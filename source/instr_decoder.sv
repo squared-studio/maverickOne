@@ -27,7 +27,7 @@ See LICENSE file in the project root for full license information
 `include "maverickOne_pkg.sv"
 
 module instr_decoder #(
-    // interger register width
+    // Integer register width
     localparam int  XLEN            = maverickOne_pkg::XLEN,
     // type definition of decoded instruction
     localparam type decoded_instr_t = maverickOne_pkg::decoded_instr_t
@@ -744,7 +744,9 @@ module instr_decoder #(
             | cmd_o.func[FNMSUB_S];
   end
 
-  always_comb cmd_o.rs3 = is_frs3 ? {1'b1, rs3} : '0;
+  always_comb begin
+    cmd_o.rs3 = is_frs3 ? {1'b1, rs3} : '0;
+  end
 
   logic is_aimm;
   always_comb begin
@@ -911,8 +913,7 @@ module instr_decoder #(
                  | cmd_o.func[SH]
                  | cmd_o.func[SW]
                  | cmd_o.func[SD]
-                 | cmd_o.func[FLW]
-                 | cmd_o.func[FSW]
+                 | cmd_o.func[FLD]
                  | cmd_o.func[SD]
                  | cmd_o.func[FLD]
                  | cmd_o.func[FSD]
@@ -961,5 +962,4 @@ module instr_decoder #(
     cmd_o.reg_req[cmd_o.rs2] = '1;
     cmd_o.reg_req[cmd_o.rs3] = '1;
   end
-
 endmodule
