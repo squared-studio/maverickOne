@@ -111,7 +111,7 @@ module fixed_priority_arbiter_tb;
   end
 
   initial begin
-    rqrd_transactions = 1000;
+    rqrd_transactions = 100000;
     fork
       begin
         forever begin

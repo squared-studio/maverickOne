@@ -112,8 +112,8 @@ module encoder_tb;
   initial begin
     forever begin
       @(posedge clk_i);
-      if (tx_total == 100 * NumWire) begin
-        $display("END OF SIMULATION B8TCH");
+      if (tx_total == 10000 * NumWire) begin
+        $display("END OF SIMULATION");
         $display("Number of total runs: %d", tx_total);
         result_print(in_out_ok, "Data Encoding");
         $display("Number of valid runs: %d", tx_success);
@@ -123,9 +123,9 @@ module encoder_tb;
   end
 
   initial begin
-    #1ms;
+    #1s;
     result_print(0, "SOMETHING WENT WRONG");
-    $fatal(1, "FATAL TIMEOUT B8TCH");
+    $fatal(1, "FATAL TIMEOUT");
   end
 
   initial begin  // main initial
