@@ -1029,9 +1029,7 @@ module instr_decoder_tb;
   initial begin
     automatic bit keep_going = 1;
     func_t instr;
-    #4ns;
     while (keep_going) begin
-      repeat (5000) @(posedge clk_i);
       $write("\033[1;33m%0t Remaining:\033[0m", $realtime);
       keep_going = 0;
       foreach (hit_count[i]) begin
@@ -1042,6 +1040,7 @@ module instr_decoder_tb;
         end
       end
       $display("\n");
+      #25us;
     end
 
     $display("Success_pc             %d", tx_pc);
