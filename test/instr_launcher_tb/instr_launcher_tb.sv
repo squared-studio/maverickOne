@@ -120,8 +120,8 @@ module instr_launcher_tb;
 
         clear_i <= $urandom_range(0, 99) < 2;  // 2% chance of clear
 
-        instr_in_valid_i <= $urandom_range(0, 99) < 50;  // data input valid 60% times
-        instr_out_ready_i <= $urandom_range(0, 99) < 50;  // data input valid 60% times
+        instr_in_valid_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
+        instr_out_ready_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
       end
     join_none
   endtask
@@ -138,9 +138,9 @@ module instr_launcher_tb;
           @(posedge clk_i);
           if (arst_ni & ~clear_i) begin
             if (instr_in_valid_i === 1 & instr_in_ready_o === 1) in_mbx.put(instr_in_i);
-          end else begin
-            while (in_mbx.num()) in_mbx.get(__instr_in__);
-            while (out_mbx.num()) out_mbx.get(__instr_out__);
+          // end else begin
+          //   while (in_mbx.num()) in_mbx.get(__instr_in__);
+          //   while (out_mbx.num()) out_mbx.get(__instr_out__);
           end
         end
       end
@@ -156,9 +156,9 @@ module instr_launcher_tb;
               if (|(__instr_out__.reg_req & locks_i))->locked_register_access_violation;
             end
 
-          end else begin
-            while (in_mbx.num()) in_mbx.get(__instr_in__);
-            while (out_mbx.num()) out_mbx.get(__instr_out__);
+          // end else begin
+          //   while (in_mbx.num()) in_mbx.get(__instr_in__);
+          //   while (out_mbx.num()) out_mbx.get(__instr_out__);
           end
         end
       end
@@ -204,7 +204,7 @@ module instr_launcher_tb;
   end
 
   initial begin
-    repeat (10000) @(posedge clk_i);
+    repeat (1000000) @(posedge clk_i);
     result_print(1, "Locked Registers Access Denied");
     $finish;
   end
