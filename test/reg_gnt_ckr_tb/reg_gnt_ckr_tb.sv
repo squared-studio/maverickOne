@@ -8,7 +8,6 @@ See LICENSE file in the project root for full license information
 */
 
 `include "maverickOne_pkg.sv"
-`include "vip/tb_ess.sv"
 
 module reg_gnt_ckr_tb;
 
@@ -17,6 +16,7 @@ module reg_gnt_ckr_tb;
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   // bring in the testbench essentials functions and macros
+  `include "vip/tb_ess.sv"
   import maverickOne_pkg::NUM_REGS;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,12 +51,13 @@ module reg_gnt_ckr_tb;
   //-VARIABLES
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  int outage_counter;
-  event blocking_violation;
-  event arb_violation[2];
-  event rd_locking_violation;
+  int outage_counter;              // counter: pipeline instruction invalid
+  event blocking_violation;        // all registers are not locked during blocking
+  event arb_violation[2];          // arbitration violation
+  event rd_locking_violation;      // rd index is not locked
   event end_of_simulation;
   logic [3:0] violation_state;
+  int mem_busy_counter;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -118,6 +119,22 @@ module reg_gnt_ckr_tb;
     join_none
   endtask
 
+  task automatic start_secondary_monitor();
+  fork
+    forever begin
+      @(posedge clk_i);
+      if (mem_op_i) $write  ("mem_op_i:   0b%b, rd:%03d, blocking: 0b%b, locks_o: 0b%b\n",
+        mem_op_i, rd_i, blocking_i, locks_o);
+      if (mem_busy_i) $write("mem_busy_i: 0b%b, rd:%03d, blocking: 0b%b, locks_o: 0b%b\n",
+        mem_busy_i, rd_i, blocking_i, locks_o);
+      if (mem_busy_o) $write("mem_busy_o: 0b%b, rd:%03d, blocking: 0b%b, locks_o: 0b%b\n",
+        mem_busy_o, rd_i, blocking_i, locks_o);
+      $write                ("                         blocking: 0b%b, locks_i: 0b%b\n\n",
+        blocking_i, locks_i);
+    end
+  join_none
+  endtask
+
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-PROCEDURALS
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,10 +143,11 @@ module reg_gnt_ckr_tb;
     start_clk_i();
     start_random_driver();
     start_in_out_mon();
+    // start_secondary_monitor();
   end  // main initial
 
   initial begin
-    repeat (1000000) @(posedge clk_i);
+    repeat (1000) @(posedge clk_i);
     ->end_of_simulation;
   end  // set simulation time...
 
