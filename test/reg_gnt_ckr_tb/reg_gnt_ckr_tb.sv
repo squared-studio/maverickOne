@@ -8,6 +8,7 @@ See LICENSE file in the project root for full license information
 */
 
 `include "maverickOne_pkg.sv"
+`include "vip/tb_ess.sv"
 
 module reg_gnt_ckr_tb;
 
@@ -16,20 +17,14 @@ module reg_gnt_ckr_tb;
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   // bring in the testbench essentials functions and macros
-  `include "vip/tb_ess.sv"
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //-LOCALPARAMS
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  localparam int NR = maverickOne_pkg::NUM_REGS;
+  import maverickOne_pkg::NUM_REGS;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-TYPEDEFS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  typedef logic [NR-1:0] logicNR;
-  typedef logic [$clog2(NR)-1:0] logicLogNR;
+  typedef logic [NUM_REGS-1:0] logicNR;
+  typedef logic [$clog2(NUM_REGS)-1:0] logicLogNR;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-SIGNALS
@@ -68,7 +63,7 @@ module reg_gnt_ckr_tb;
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   reg_gnt_ckr #(
-      .NR(NR)
+      .NR(NUM_REGS)
   ) urgckr_1 (
       .pl_valid_i,
       .blocking_i,
@@ -93,7 +88,7 @@ module reg_gnt_ckr_tb;
         pl_valid_i <= $urandom_range(0, 99) > 10;  // 10% instruction outage prob.
         blocking_i <= $urandom_range(0, 99) < 10;  // 10% blocking calls
         rd_i       <= $urandom;
-        reg_req_i  <= 1 << $urandom_range(0, NR - 1) | 1 << $urandom_range(0, NR - 1);
+        reg_req_i  <= 1 << $urandom_range(0, NUM_REGS - 1) | 1 << $urandom_range(0, NUM_REGS - 1);
         locks_i    <= {$urandom, $urandom};
         mem_op_i   <= $urandom;  // random memory operation flag
         mem_busy_i <= $urandom;  // random memory busy flag
