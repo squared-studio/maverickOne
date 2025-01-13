@@ -51,13 +51,13 @@ module reg_gnt_ckr_tb;
   //-VARIABLES
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  int outage_counter;              // counter: pipeline instruction invalid
-  event blocking_violation;        // all registers are not locked during blocking
-  event arb_violation[2];          // arbitration violation
-  event rd_locking_violation;      // rd index is not locked
+  int outage_counter;  // counter: pipeline instruction invalid
+  event blocking_violation;  // all registers are not locked during blocking
+  event arb_violation[2];  // arbitration violation
+  event rd_locking_violation;  // rd index is not locked
   event end_of_simulation;
-  logic [3:0] violation_state;
-  int mem_busy_counter;
+  event mem_op_override[2];
+  logic [5:0] violation_state;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -110,29 +110,15 @@ module reg_gnt_ckr_tb;
           if (blocking_i) begin
             if (~(&locks_o))->blocking_violation;
           end
-          if (|(reg_req_i & locks_i)) begin
-            if (arb_req_o)->arb_violation[1];
-          end
           if (rd_i > 0 && locks_o[rd_i] !== 1)->rd_locking_violation;
+          if (arb_req_o) begin
+            if(|(reg_req_i & locks_i)) ->arb_violation[1];
+            if(mem_busy_i & mem_op_i) ->mem_op_override[0];
+          end
+          if ((mem_op_i | mem_busy_i) & ~mem_busy_o) ->mem_op_override[1];
         end
       end
     join_none
-  endtask
-
-  task automatic start_secondary_monitor();
-  fork
-    forever begin
-      @(posedge clk_i);
-      if (mem_op_i) $write  ("mem_op_i:   0b%b, rd:%03d, blocking: 0b%b, locks_o: 0b%b\n",
-        mem_op_i, rd_i, blocking_i, locks_o);
-      if (mem_busy_i) $write("mem_busy_i: 0b%b, rd:%03d, blocking: 0b%b, locks_o: 0b%b\n",
-        mem_busy_i, rd_i, blocking_i, locks_o);
-      if (mem_busy_o) $write("mem_busy_o: 0b%b, rd:%03d, blocking: 0b%b, locks_o: 0b%b\n",
-        mem_busy_o, rd_i, blocking_i, locks_o);
-      $write                ("                         blocking: 0b%b, locks_i: 0b%b\n\n",
-        blocking_i, locks_i);
-    end
-  join_none
   endtask
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,11 +129,10 @@ module reg_gnt_ckr_tb;
     start_clk_i();
     start_random_driver();
     start_in_out_mon();
-    // start_secondary_monitor();
   end  // main initial
 
   initial begin
-    repeat (1000) @(posedge clk_i);
+    repeat (1000000) @(posedge clk_i);
     ->end_of_simulation;
   end  // set simulation time...
 
@@ -196,6 +181,26 @@ module reg_gnt_ckr_tb;
         $write("arb_req_o: 0b%b\n\n", arb_req_o);
         violation_state[3] = 'b0;
       end
+      begin
+        @(mem_op_override[0]);
+        $write("[%.3t] Memory Operation Override: Arbitration Failure\n", $realtime);
+        $write("reg_req_i: 0b%b\n", reg_req_i);
+        $write("locks_i: 0b%b\n", locks_i);
+        $write("rd_i: %03d\t pl_valid_i: 0b%b\t blocking_i: 0b%b\n", rd_i, pl_valid_i, blocking_i);
+        $write("locks_o: 0b%b\t", locks_o);
+        $write("arb_req_o: 0b%b\n\n", arb_req_o);
+        violation_state[4] = 'b0;
+      end
+      begin
+        @(mem_op_override[1]);
+        $write("[%.3t] Memory Operation Override failed\n", $realtime);
+        $write("reg_req_i: 0b%b\n", reg_req_i);
+        $write("locks_i: 0b%b\n", locks_i);
+        $write("rd_i: %03d\t pl_valid_i: 0b%b\t blocking_i: 0b%b\n", rd_i, pl_valid_i, blocking_i);
+        $write("locks_o: 0b%b\t", locks_o);
+        $write("arb_req_o: 0b%b\n\n", arb_req_o);
+        violation_state[5] = 'b0;
+      end
     join_none
   end  // check for condition violations...
 
@@ -205,6 +210,8 @@ module reg_gnt_ckr_tb;
     result_print(violation_state[1], "Arbitration During Outage Check");
     result_print(violation_state[2], "Arbitration Of Locked Registers Check");
     result_print(violation_state[3], "Destination Register Locking Check");
+    result_print(violation_state[4], "Memory Operation Arbitration Blocking Check");
+    result_print(violation_state[5], "Memory Operation Memory Busy Check");
     $finish;
   end  // results of simulation...
 
