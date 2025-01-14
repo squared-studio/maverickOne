@@ -17,19 +17,14 @@ module reg_gnt_ckr_tb;
 
   // bring in the testbench essentials functions and macros
   `include "vip/tb_ess.sv"
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //-LOCALPARAMS
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  localparam int NR = maverickOne_pkg::NUM_REGS;
+  import maverickOne_pkg::NUM_REGS;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-TYPEDEFS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  typedef logic [NR-1:0] logicNR;
-  typedef logic [$clog2(NR)-1:0] logicLogNR;
+  typedef logic [NUM_REGS-1:0] logicNR;
+  typedef logic [$clog2(NUM_REGS)-1:0] logicLogNR;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-SIGNALS
@@ -56,19 +51,20 @@ module reg_gnt_ckr_tb;
   //-VARIABLES
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  int outage_counter;
-  event blocking_violation;
-  event arb_violation[2];
-  event rd_locking_violation;
+  int outage_counter;  // counter: pipeline instruction invalid
+  event blocking_violation;  // all registers are not locked during blocking
+  event arb_violation[2];  // arbitration violation
+  event rd_locking_violation;  // rd index is not locked
   event end_of_simulation;
-  logic [3:0] violation_state;
+  event mem_op_override[2];
+  logic [5:0] violation_state;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   reg_gnt_ckr #(
-      .NR(NR)
+      .NR(NUM_REGS)
   ) urgckr_1 (
       .pl_valid_i,
       .blocking_i,
@@ -93,7 +89,7 @@ module reg_gnt_ckr_tb;
         pl_valid_i <= $urandom_range(0, 99) > 10;  // 10% instruction outage prob.
         blocking_i <= $urandom_range(0, 99) < 10;  // 10% blocking calls
         rd_i       <= $urandom;
-        reg_req_i  <= 1 << $urandom_range(0, NR - 1) | 1 << $urandom_range(0, NR - 1);
+        reg_req_i  <= 1 << $urandom_range(0, NUM_REGS - 1) | 1 << $urandom_range(0, NUM_REGS - 1);
         locks_i    <= {$urandom, $urandom};
         mem_op_i   <= $urandom;  // random memory operation flag
         mem_busy_i <= $urandom;  // random memory busy flag
@@ -114,10 +110,12 @@ module reg_gnt_ckr_tb;
           if (blocking_i) begin
             if (~(&locks_o))->blocking_violation;
           end
-          if (|(reg_req_i & locks_i)) begin
-            if (arb_req_o)->arb_violation[1];
-          end
           if (rd_i > 0 && locks_o[rd_i] !== 1)->rd_locking_violation;
+          if (arb_req_o) begin
+            if(|(reg_req_i & locks_i)) ->arb_violation[1];
+            if(mem_busy_i & mem_op_i) ->mem_op_override[0];
+          end
+          if ((mem_op_i | mem_busy_i) & ~mem_busy_o) ->mem_op_override[1];
         end
       end
     join_none
@@ -183,6 +181,26 @@ module reg_gnt_ckr_tb;
         $write("arb_req_o: 0b%b\n\n", arb_req_o);
         violation_state[3] = 'b0;
       end
+      begin
+        @(mem_op_override[0]);
+        $write("[%.3t] Memory Operation Override: Arbitration Failure\n", $realtime);
+        $write("reg_req_i: 0b%b\n", reg_req_i);
+        $write("locks_i: 0b%b\n", locks_i);
+        $write("rd_i: %03d\t pl_valid_i: 0b%b\t blocking_i: 0b%b\n", rd_i, pl_valid_i, blocking_i);
+        $write("locks_o: 0b%b\t", locks_o);
+        $write("arb_req_o: 0b%b\n\n", arb_req_o);
+        violation_state[4] = 'b0;
+      end
+      begin
+        @(mem_op_override[1]);
+        $write("[%.3t] Memory Operation Override failed\n", $realtime);
+        $write("reg_req_i: 0b%b\n", reg_req_i);
+        $write("locks_i: 0b%b\n", locks_i);
+        $write("rd_i: %03d\t pl_valid_i: 0b%b\t blocking_i: 0b%b\n", rd_i, pl_valid_i, blocking_i);
+        $write("locks_o: 0b%b\t", locks_o);
+        $write("arb_req_o: 0b%b\n\n", arb_req_o);
+        violation_state[5] = 'b0;
+      end
     join_none
   end  // check for condition violations...
 
@@ -192,6 +210,8 @@ module reg_gnt_ckr_tb;
     result_print(violation_state[1], "Arbitration During Outage Check");
     result_print(violation_state[2], "Arbitration Of Locked Registers Check");
     result_print(violation_state[3], "Destination Register Locking Check");
+    result_print(violation_state[4], "Memory Operation Arbitration Blocking Check");
+    result_print(violation_state[5], "Memory Operation Memory Busy Check");
     $finish;
   end  // results of simulation...
 
