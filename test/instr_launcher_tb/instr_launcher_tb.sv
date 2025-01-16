@@ -51,14 +51,16 @@ module instr_launcher_tb;
   //-VARIABLES
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  event                 locked_register_access_violation;
-  event                 mem_op_priority_violation;
-  event                 blocking_priority_violation;
-  logic           [2:0] violation_flags = '0;
+  // event                 locked_register_access_violation;
+  // event                 mem_op_priority_violation;
+  // event                 blocking_priority_violation;
+  // logic           [2:0] violation_flags = '0;
+  logic instr_mismatch_flag;
   decoded_instr_t       pipeline_stage                                [$];
-  decoded_instr_t       __instr_in__;
+  // decoded_instr_t       __instr_in__;
   decoded_instr_t       __instr_out__;
   int                   NO_max = maverickOne_pkg::NUM_OUTSTANDING + 1;
+  logic                 memory_blocked;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -136,120 +138,104 @@ module instr_launcher_tb;
   endtask
 
   task automatic start_in_out_monitor();
+  instr_mismatch_flag = '0;
     fork
       forever begin
+        memory_blocked = '0;
         @(posedge clk_i);
-        if (arst_ni && ~clear_i) begin
+        if (~arst_ni) __instr_out__ = 'x;
+        else if (clear_i) __instr_out__ = '0;
+        else if (arst_ni && ~clear_i) begin
 
-          if (instr_in_valid_i && instr_in_ready_o) begin
-            if (pipeline_stage.size() > 0 && pipeline_stage.size() <= NO_max) begin
-              pipeline_stage.push_front(instr_in_i);
+          if (instr_out_valid_o && instr_out_ready_i) begin
+            if (__instr_out__ !== instr_out_o) begin
+              $write("instr_out_rtl: %p\n", instr_out_o);
+              $write("instr_out_tb : %p\n", __instr_out__);
+              instr_mismatch_flag = '1;
             end
           end
 
-          if (instr_out_valid_o && instr_out_ready_i) begin
-            
+          if (instr_in_valid_i &&
+          instr_in_ready_o &&
+          pipeline_stage.size() > 0 &&
+          pipeline_stage.size() <= NO_max) begin
+            pipeline_stage.push_back(instr_in_i);
+          end
+
+          foreach (pipeline_stage[i]) begin
+
+            if (pipeline_stage[i].blocking) begin
+
+              if (~|(pipeline_stage[i].reg_req & locks_i)) begin
+                __instr_out__ = pipeline_stage[i];
+                pipeline_stage.delete(i);
+                break;
+              end else begin
+                __instr_out__ = '0;
+                break;
+              end
+
+            end else if (pipeline_stage[i].mem_op) begin
+
+              if (memory_blocked === '1) begin
+                __instr_out__ = '0;
+                continue;
+              end
+              else begin
+                if (~|(pipeline_stage[i].reg_req & locks_i)) begin
+                  __instr_out__ = pipeline_stage[i];
+                  pipeline_stage.delete(i);
+                  break;
+                end else begin
+                  memory_blocked = '1;
+                  __instr_out__ = '0;
+                  continue;
+                end
+              end
+
+            end else begin
+
+              if (~|(pipeline_stage[i].reg_req & locks_i)) begin
+                __instr_out__ = pipeline_stage[i];
+                pipeline_stage.delete(i);
+                break;
+              end else begin
+                locks_i = (1 << pipeline_stage[i].rd) | locks_i;
+                __instr_out__ = '0;
+                continue;
+              end
+
+            end
+
           end
 
         end else begin
-          while (pipeline_stage.size()) pipeline_stage.pop_front();
+          while (pipeline_stage.size()) begin
+            pipeline_stage.pop_front();
+          end
         end
       end
     join_none
   endtask
 
-  // task automatic verify_mem_op(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
-  //   // // $write("Verifying memory operation.\n");
-  //   // ->mem_op_priority_violation; // Intentional bug: PANICKING UNNECESSARY
-  //   while (in_mbx.num()) begin
-  //     in_mbx.get(temp_instr);
-  //     temp_q.push_back(temp_instr);
-  //   end
-  //   foreach (temp_q[i]) begin
-  //     if (temp_q[i] === __instr_out__) begin
-  //       // $write("Out at index: %03d\n", i);
-  //       // $write("temp_q: %p\n", temp_q[i]);
-  //       // $write("instr_out: %p\n", __instr_out__);
-  //       break;
-  //     end else if (temp_q[i].mem_op || temp_q[i].blocking) begin
-  //       ->mem_op_priority_violation;
-  //       // $write("Violation at: %03d\n", i);
-  //       // $write("temp_q: %p\n", temp_q[i]);
-  //     end
-  //   end
-  //   foreach (temp_q[i]) begin
-  //     in_mbx.put(temp_q[i]);
-  //   end
-  //   while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
-  // endtask
-
-  // task automatic verify_blocking(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
-  //   // // $write("Verifying blocking operation.\n");
-  //   while (in_mbx.num()) begin
-  //     in_mbx.get(temp_instr);
-  //     temp_q.push_back(temp_instr);
-  //   end
-  //   foreach (temp_q[i]) begin
-  //     if (temp_q[i] === __instr_out__) begin
-  //       // $write("Out at index: %03d\n", i);
-  //       // $write("temp_q: %p\n", temp_q[i]);
-  //       // $write("instr_out: %p\n", __instr_out__);
-  //       break;
-  //     end else if (temp_q[i].mem_op || temp_q[i].blocking) begin
-  //       ->blocking_priority_violation;
-  //       // $write("Violation at: %03d\n", i);
-  //       // $write("temp_q: %p\n", temp_q[i]);
-  //     end
-  //   end
-  //   foreach (temp_q[i]) begin
-  //     in_mbx.put(temp_q[i]);
-  //   end
-  //   while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
-  // endtask
-
-  // task automatic cascaded_locks(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__,
-  //                               inout locks_t locks_i);
-  //   // // $write("Verifying locking preservation.\n");
-  //   while (in_mbx.num()) begin
-  //     in_mbx.get(temp_instr);
-  //     temp_q.push_back(temp_instr);
-  //   end
-  //   foreach (temp_q[i]) begin
-  //     if (temp_q[i] === __instr_out__) begin
-  //       // $write("Out at index: %03d\n", i);
-  //       // $write("temp_q: %p\n", temp_q[i]);
-  //       // $write("instr_out: %p\n", __instr_out__);
-  //       break;
-  //     end else begin
-  //       locks_i |= (1 << temp_q[i].rd);
-  //       if (temp_q[i].blocking) locks_i = '1;
-  //     end
-  //   end
-  //   foreach (temp_q[i]) begin
-  //     if (temp_q[i] === __instr_out__) continue;
-  //     in_mbx.put(temp_q[i]);
-  //   end
-  //   while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
-  // endtask
-
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-SEQUENTIALS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  always @(locked_register_access_violation) begin
-    violation_flags[0] = 1;
-    $write("Error 0\n");
-  end
+  // always @(locked_register_access_violation) begin
+  //   violation_flags[0] = 1;
+  //   $write("Error 0\n");
+  // end
 
-  always @(mem_op_priority_violation) begin
-    violation_flags[1] = 1;
-    $write("Error 1\n");
-  end
+  // always @(mem_op_priority_violation) begin
+  //   violation_flags[1] = 1;
+  //   $write("Error 1\n");
+  // end
 
-  always @(blocking_priority_violation) begin
-    violation_flags[2] = 1;
-    $write("Error 2\n");
-  end
+  // always @(blocking_priority_violation) begin
+  //   violation_flags[2] = 1;
+  //   $write("Error 2\n");
+  // end
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-PROCEDURALS
@@ -264,9 +250,10 @@ module instr_launcher_tb;
 
   initial begin
     repeat (15000) @(posedge clk_i);
-    result_print(~violation_flags[0], "Locked Registers Access Denied");
-    result_print(~violation_flags[1], "Memory Operation Instruction Prioritization");
-    result_print(~violation_flags[2], "Blocking Instruction Prioritization");
+    // result_print(~violation_flags[0], "Locked Registers Access Denied");
+    // result_print(~violation_flags[1], "Memory Operation Instruction Prioritization");
+    // result_print(~violation_flags[2], "Blocking Instruction Prioritization");
+    result_print(~instr_mismatch_flag, "Wrong instruction launched");
     $finish;
   end
 
