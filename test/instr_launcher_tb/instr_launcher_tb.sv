@@ -55,9 +55,10 @@ module instr_launcher_tb;
   event                 mem_op_priority_violation;
   event                 blocking_priority_violation;
   logic           [2:0] violation_flags = '0;
-  int                   full_mailbox = 0;
-  decoded_instr_t       temp_instr;
-  decoded_instr_t       temp_q                           [$];
+  decoded_instr_t       pipeline_stage                                [$];
+  decoded_instr_t       __instr_in__;
+  decoded_instr_t       __instr_out__;
+  int                   NO_max = maverickOne_pkg::NUM_OUTSTANDING + 1;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -103,18 +104,10 @@ module instr_launcher_tb;
     fork
       forever begin
         @(posedge clk_i);
-        // // $write("[%.3t]\n", $realtime);
-
         clear_i <= $urandom_range(0, 99) < 2;  // 2% chance of clear
         instr_in_valid_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
         instr_out_ready_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
         locks_i <= $urandom;  // register locks profile input
-
-        // // $write("clear_i: 0b%b\n", clear_i);
-        // // $write("instr_in_valid_i: 0b%b\n", instr_in_valid_i);
-        // // $write("instr_out_ready_i: 0b%b\n", instr_out_ready_i);
-        // // $write("locks_i: 0b%b\n", locks_i);
-
         instr_in_i.func <= 1 << $urandom_range(0, maverickOne_pkg::TOTAL_FUNCS - 1);
         instr_in_i.rd <= $urandom_range(0, NUM_REGS - 1);
         instr_in_i.imm <= $urandom_range(0, NUM_REGS - 1);
@@ -128,143 +121,116 @@ module instr_launcher_tb;
         )) | (1 << $urandom_range(
             0, NUM_REGS - 1
         ));
-        // // $write("instr_in_i.func: 0b%b\n", instr_in_i.func);
-        // // $write("instr_in_i.rd: 0b%b\n", instr_in_i.rd);
-        // // $write("instr_in_i.blocking: 0b%b\n", instr_in_i.blocking);
-        // // $write("instr_in_i.reg_req: 0b%b\n", instr_in_i.reg_req);
+
+        $write("[%.3t]\n", $realtime);
+        $write("clear_i: 0b%b\n", clear_i);
+        $write("instr_in_valid_i: 0b%b\n", instr_in_valid_i);
+        $write("instr_out_ready_i: 0b%b\n", instr_out_ready_i);
+        $write("locks_i: 0b%b\n", locks_i);
+        $write("instr_in_i.func: 0b%b\n", instr_in_i.func);
+        $write("instr_in_i.rd: 0b%b\n", instr_in_i.rd);
+        $write("instr_in_i.blocking: 0b%b\n", instr_in_i.blocking);
+        $write("instr_in_i.reg_req: 0b%b\n", instr_in_i.reg_req);
       end
     join_none
   endtask
 
   task automatic start_in_out_monitor();
-    decoded_instr_t __instr_in__;
-    decoded_instr_t __instr_out__;
-
-    mailbox #(decoded_instr_t) in_mbx = new(maverickOne_pkg::NUM_OUTSTANDING);
-    mailbox #(decoded_instr_t) out_mbx = new();
     fork
       forever begin
         @(posedge clk_i);
-        #5ps;
-        // $write("[%.3t]\n", $realtime);
-
         if (arst_ni && ~clear_i) begin
-          // // $write("CLEAR and RESET disabled.\n");
 
-          if ((instr_in_valid_i === 1) && (instr_in_ready_o === 1)) begin
-            // // $write("Input Handshake VALID and READY\n");
-            if ((in_mbx.num() >= 0) && (in_mbx.num() < maverickOne_pkg::NUM_OUTSTANDING))
-              in_mbx.put(instr_in_i);
-          end
-
-          if (instr_out_valid_o === 1 && instr_out_ready_i === 1) begin
-            // // $write("Output Handshake VALID and READY\n");
-            out_mbx.put(instr_out_o);
-          end
-
-          if (out_mbx.num()) begin
-            // // $write("Checking for violations...\n");
-            out_mbx.get(__instr_out__);
-            // $write("instr_out: %p\n", __instr_out__);
-            // $write("out_box_n: %03d\n", out_mbx.num());
-            // $write("in_box_n : %03d\n", in_mbx.num());
-            if ((in_mbx.num() > 0) && (in_mbx.num() <= maverickOne_pkg::NUM_OUTSTANDING)) begin
-              // verify_mem_op(in_mbx, __instr_out__);  // in_mbx remains unchanged
-              // verify_blocking(in_mbx, __instr_out__);  // in_mbx remains unchanged
-              cascaded_locks(in_mbx, __instr_out__, locks_i);  // redundant instr popped out
+          if (instr_in_valid_i && instr_in_ready_o) begin
+            if (pipeline_stage.size() > 0 && pipeline_stage.size() <= NO_max) begin
+              pipeline_stage.push_front(instr_in_i);
             end
-            if (|(__instr_out__.reg_req & locks_i)) begin
-              ->locked_register_access_violation;
-              // $write("reg_req: 0b%b\n", __instr_out__.reg_req);
-              // $write("locks_i: 0b%b\n", locks_i);
-            end
-            // $write("\n");
           end
 
-        end else begin  // empty the mailboxes T-T
-          // // $write("CLEAR or RESET enabled.\n");
-          // // $write("\n");
-          while (in_mbx.num()) in_mbx.get(__instr_in__);
-          while (out_mbx.num()) out_mbx.get(__instr_out__);
+          if (instr_out_valid_o && instr_out_ready_i) begin
+            
+          end
+
+        end else begin
+          while (pipeline_stage.size()) pipeline_stage.pop_front();
         end
-
       end
     join_none
   endtask
 
-  task automatic verify_mem_op(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
-    // // $write("Verifying memory operation.\n");
-    // ->mem_op_priority_violation; // Intentional bug: PANICKING UNNECESSARY
-    while (in_mbx.num()) begin
-      in_mbx.get(temp_instr);
-      temp_q.push_back(temp_instr);
-    end
-    foreach (temp_q[i]) begin
-      if (temp_q[i] === __instr_out__) begin
-        // $write("Out at index: %03d\n", i);
-        // $write("temp_q: %p\n", temp_q[i]);
-        // $write("instr_out: %p\n", __instr_out__);
-        break;
-      end else if (temp_q[i].mem_op || temp_q[i].blocking) begin
-        ->mem_op_priority_violation;
-        // $write("Violation at: %03d\n", i);
-        // $write("temp_q: %p\n", temp_q[i]);
-      end
-    end
-    foreach (temp_q[i]) begin
-      in_mbx.put(temp_q[i]);
-    end
-    while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
-  endtask
+  // task automatic verify_mem_op(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
+  //   // // $write("Verifying memory operation.\n");
+  //   // ->mem_op_priority_violation; // Intentional bug: PANICKING UNNECESSARY
+  //   while (in_mbx.num()) begin
+  //     in_mbx.get(temp_instr);
+  //     temp_q.push_back(temp_instr);
+  //   end
+  //   foreach (temp_q[i]) begin
+  //     if (temp_q[i] === __instr_out__) begin
+  //       // $write("Out at index: %03d\n", i);
+  //       // $write("temp_q: %p\n", temp_q[i]);
+  //       // $write("instr_out: %p\n", __instr_out__);
+  //       break;
+  //     end else if (temp_q[i].mem_op || temp_q[i].blocking) begin
+  //       ->mem_op_priority_violation;
+  //       // $write("Violation at: %03d\n", i);
+  //       // $write("temp_q: %p\n", temp_q[i]);
+  //     end
+  //   end
+  //   foreach (temp_q[i]) begin
+  //     in_mbx.put(temp_q[i]);
+  //   end
+  //   while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
+  // endtask
 
-  task automatic verify_blocking(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
-    // // $write("Verifying blocking operation.\n");
-    while (in_mbx.num()) begin
-      in_mbx.get(temp_instr);
-      temp_q.push_back(temp_instr);
-    end
-    foreach (temp_q[i]) begin
-      if (temp_q[i] === __instr_out__) begin
-        // $write("Out at index: %03d\n", i);
-        // $write("temp_q: %p\n", temp_q[i]);
-        // $write("instr_out: %p\n", __instr_out__);
-        break;
-      end else if (temp_q[i].mem_op || temp_q[i].blocking) begin
-        ->blocking_priority_violation;
-        // $write("Violation at: %03d\n", i);
-        // $write("temp_q: %p\n", temp_q[i]);
-      end
-    end
-    foreach (temp_q[i]) begin
-      in_mbx.put(temp_q[i]);
-    end
-    while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
-  endtask
+  // task automatic verify_blocking(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
+  //   // // $write("Verifying blocking operation.\n");
+  //   while (in_mbx.num()) begin
+  //     in_mbx.get(temp_instr);
+  //     temp_q.push_back(temp_instr);
+  //   end
+  //   foreach (temp_q[i]) begin
+  //     if (temp_q[i] === __instr_out__) begin
+  //       // $write("Out at index: %03d\n", i);
+  //       // $write("temp_q: %p\n", temp_q[i]);
+  //       // $write("instr_out: %p\n", __instr_out__);
+  //       break;
+  //     end else if (temp_q[i].mem_op || temp_q[i].blocking) begin
+  //       ->blocking_priority_violation;
+  //       // $write("Violation at: %03d\n", i);
+  //       // $write("temp_q: %p\n", temp_q[i]);
+  //     end
+  //   end
+  //   foreach (temp_q[i]) begin
+  //     in_mbx.put(temp_q[i]);
+  //   end
+  //   while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
+  // endtask
 
-  task automatic cascaded_locks(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__,
-                                inout locks_t locks_i);
-    // // $write("Verifying locking preservation.\n");
-    while (in_mbx.num()) begin
-      in_mbx.get(temp_instr);
-      temp_q.push_back(temp_instr);
-    end
-    foreach (temp_q[i]) begin
-      if (temp_q[i] === __instr_out__) begin
-        // $write("Out at index: %03d\n", i);
-        // $write("temp_q: %p\n", temp_q[i]);
-        // $write("instr_out: %p\n", __instr_out__);
-        break;
-      end else begin
-        locks_i |= (1 << temp_q[i].rd);
-        if (temp_q[i].blocking) locks_i = '1;
-      end
-    end
-    foreach (temp_q[i]) begin
-      if (temp_q[i] === __instr_out__) continue;
-      in_mbx.put(temp_q[i]);
-    end
-    while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
-  endtask
+  // task automatic cascaded_locks(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__,
+  //                               inout locks_t locks_i);
+  //   // // $write("Verifying locking preservation.\n");
+  //   while (in_mbx.num()) begin
+  //     in_mbx.get(temp_instr);
+  //     temp_q.push_back(temp_instr);
+  //   end
+  //   foreach (temp_q[i]) begin
+  //     if (temp_q[i] === __instr_out__) begin
+  //       // $write("Out at index: %03d\n", i);
+  //       // $write("temp_q: %p\n", temp_q[i]);
+  //       // $write("instr_out: %p\n", __instr_out__);
+  //       break;
+  //     end else begin
+  //       locks_i |= (1 << temp_q[i].rd);
+  //       if (temp_q[i].blocking) locks_i = '1;
+  //     end
+  //   end
+  //   foreach (temp_q[i]) begin
+  //     if (temp_q[i] === __instr_out__) continue;
+  //     in_mbx.put(temp_q[i]);
+  //   end
+  //   while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
+  // endtask
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-SEQUENTIALS
