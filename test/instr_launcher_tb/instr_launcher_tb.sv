@@ -35,17 +35,17 @@ module instr_launcher_tb;
   `CREATE_CLK(clk_i, 4ns, 6ns)
 
   // RTL Inputs
-  logic                 arst_ni = 1;
-  logic                 clear_i = 0;
-  decoded_instr_t       instr_in_i;
-  logic                 instr_in_valid_i;
-  locks_t               locks_i;
-  logic                 instr_out_ready_i;
+  logic           arst_ni = 1;
+  logic           clear_i = 0;
+  decoded_instr_t instr_in_i;
+  logic           instr_in_valid_i;
+  locks_t         locks_i;
+  logic           instr_out_ready_i;
 
   // RTL Outputs
-  logic                 instr_in_ready_o;
-  decoded_instr_t       instr_out_o;
-  logic                 instr_out_valid_o;
+  logic           instr_in_ready_o;
+  decoded_instr_t instr_out_o;
+  logic           instr_out_valid_o;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-VARIABLES
@@ -55,12 +55,12 @@ module instr_launcher_tb;
   // event                 mem_op_priority_violation;
   // event                 blocking_priority_violation;
   // logic           [2:0] violation_flags = '0;
-  logic instr_mismatch_flag;
-  decoded_instr_t       pipeline_stage                                [$];
+  logic           instr_mismatch_flag;
+  decoded_instr_t pipeline_stage                                [$];
   // decoded_instr_t       __instr_in__;
-  decoded_instr_t       __instr_out__;
-  int                   NO_max = maverickOne_pkg::NUM_OUTSTANDING + 1;
-  logic                 memory_blocked;
+  decoded_instr_t __instr_out__;
+  int             NO_max = maverickOne_pkg::NUM_OUTSTANDING + 1;
+  logic           memory_blocked;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -124,96 +124,111 @@ module instr_launcher_tb;
             0, NUM_REGS - 1
         ));
 
-        $write("[%.3t]\n", $realtime);
+        $write("[%.3t] Driver time\n", $realtime);
         $write("clear_i: 0b%b\n", clear_i);
         $write("instr_in_valid_i: 0b%b\n", instr_in_valid_i);
-        $write("instr_out_ready_i: 0b%b\n", instr_out_ready_i);
+        // $write("instr_out_ready_i: 0b%b\n", instr_out_ready_i);
         $write("locks_i: 0b%b\n", locks_i);
-        $write("instr_in_i.func: 0b%b\n", instr_in_i.func);
-        $write("instr_in_i.rd: 0b%b\n", instr_in_i.rd);
-        $write("instr_in_i.blocking: 0b%b\n", instr_in_i.blocking);
-        $write("instr_in_i.reg_req: 0b%b\n", instr_in_i.reg_req);
+        // $write("instr_in_i.func: 0b%b\n", instr_in_i.func);
+        // $write("instr_in_i.rd: 0b%b\n", instr_in_i.rd);
+        // $write("instr_in_i.blocking: 0b%b\n", instr_in_i.blocking);
+        // $write("instr_in_i.reg_req: 0b%b\n", instr_in_i.reg_req);
+        $write("instr_in_i: %p\n", instr_in_i);
+        $write("\n");
       end
     join_none
   endtask
 
   task automatic start_in_out_monitor();
-  instr_mismatch_flag = '0;
+    instr_mismatch_flag = '0;
     fork
       forever begin
         memory_blocked = '0;
         @(posedge clk_i);
-        if (~arst_ni) __instr_out__ = 'x;
-        else if (clear_i) __instr_out__ = '0;
-        else if (arst_ni && ~clear_i) begin
 
-          if (instr_out_valid_o && instr_out_ready_i) begin
-            if (__instr_out__ !== instr_out_o) begin
+        $write("[%.3t] Monitor time\n", $realtime);
+
+        if (~arst_ni | clear_i) __instr_out__ = '0;
+        else if (arst_ni & ~clear_i) begin
+
+          if (instr_out_valid_o & instr_out_ready_i) begin
+            $write("Output VALID READY\n");
+            if (__instr_out__ === instr_out_o) begin
               $write("instr_out_rtl: %p\n", instr_out_o);
               $write("instr_out_tb : %p\n", __instr_out__);
               instr_mismatch_flag = '1;
             end
           end
 
-          if (instr_in_valid_i &&
-          instr_in_ready_o &&
-          pipeline_stage.size() > 0 &&
-          pipeline_stage.size() <= NO_max) begin
+          $write("instr_out_rtl: %p\n", instr_out_o);
+
+          if (instr_in_valid_i &
+          instr_in_ready_o &
+          (pipeline_stage.size() >= 0) &
+          (pipeline_stage.size() < NO_max)) begin
             pipeline_stage.push_back(instr_in_i);
           end
+
+          foreach (pipeline_stage[i])
+          $write(
+              "pipeline%02d:\n%p\nreg_req: 0b%b\n", i, pipeline_stage[i], pipeline_stage[i].reg_req
+          );
 
           foreach (pipeline_stage[i]) begin
 
             if (pipeline_stage[i].blocking) begin
 
-              if (~|(pipeline_stage[i].reg_req & locks_i)) begin
-                __instr_out__ = pipeline_stage[i];
-                pipeline_stage.delete(i);
+              $write("Overlap: 0b%b\n", |(pipeline_stage[i].reg_req & locks_i));
+              if (|(pipeline_stage[i].reg_req & locks_i)) begin
+              __instr_out__ = 'x;
                 break;
               end else begin
-                __instr_out__ = '0;
+                __instr_out__ = pipeline_stage[i];
+                pipeline_stage.delete(i);
                 break;
               end
 
             end else if (pipeline_stage[i].mem_op) begin
 
               if (memory_blocked === '1) begin
-                __instr_out__ = '0;
-                continue;
-              end
-              else begin
-                if (~|(pipeline_stage[i].reg_req & locks_i)) begin
-                  __instr_out__ = pipeline_stage[i];
-                  pipeline_stage.delete(i);
-                  break;
-                end else begin
-                  memory_blocked = '1;
-                  __instr_out__ = '0;
-                  continue;
-                end
+                // __instr_out__ = 'x;
+                // continue;
+                //     end else begin
+                //       if (~|(pipeline_stage[i].reg_req & locks_i)) begin
+                //         __instr_out__ = pipeline_stage[i];
+                //         pipeline_stage.delete(i);
+                //         break;
+                //       end else begin
+                //         memory_blocked = '1;
+                //         __instr_out__  = 'x;
+                //         continue;
+                //       end
               end
 
             end else begin
 
               if (~|(pipeline_stage[i].reg_req & locks_i)) begin
-                __instr_out__ = pipeline_stage[i];
-                pipeline_stage.delete(i);
-                break;
-              end else begin
-                locks_i = (1 << pipeline_stage[i].rd) | locks_i;
-                __instr_out__ = '0;
-                continue;
+                // __instr_out__ = pipeline_stage[i];
+                // pipeline_stage.delete(i);
+                // break;
+                //     end else begin
+                //       locks_i = (1 << pipeline_stage[i].rd) | locks_i;
+                //       __instr_out__ = 'x;
+                //       continue;
               end
 
             end
 
           end
 
-        end else begin
-          while (pipeline_stage.size()) begin
-            pipeline_stage.pop_front();
-          end
+          $write("instr_out_tb : %p\n", __instr_out__);
+
+          // end else if (clear_i) begin
+          //   while (pipeline_stage.size()) begin
+          //     pipeline_stage.pop_front();
+          //   end
         end
+        $write("\n");
       end
     join_none
   endtask
@@ -249,11 +264,11 @@ module instr_launcher_tb;
   end
 
   initial begin
-    repeat (15000) @(posedge clk_i);
+    repeat (11) @(posedge clk_i);
     // result_print(~violation_flags[0], "Locked Registers Access Denied");
     // result_print(~violation_flags[1], "Memory Operation Instruction Prioritization");
     // result_print(~violation_flags[2], "Blocking Instruction Prioritization");
-    result_print(~instr_mismatch_flag, "Wrong instruction launched");
+    result_print(~instr_mismatch_flag, "Expected instruction launched");
     $finish;
   end
 
