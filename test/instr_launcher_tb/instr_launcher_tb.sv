@@ -52,6 +52,8 @@ module instr_launcher_tb;
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   event           locked_register_access_violation;
+  event           mem_op_priority_violation;
+  event           blocking_priority_violation;
   int             full_mailbox = 0;
   decoded_instr_t temp_instr;
   decoded_instr_t temp_q                           [$];
@@ -152,7 +154,11 @@ module instr_launcher_tb;
 
             if (out_mbx.num()) begin
               out_mbx.get(__instr_out__);
-              if (in_mbx.num()) cascaded_locks(in_mbx, __instr_out__, locks_i);
+              if (in_mbx.num()) begin
+                verify_mem_op(in_mbx, __instr_out__); // in_mbx remains unchanged
+                verify_blocking(in_mbx, __instr_out__); // in_mbx remains unchanged
+                cascaded_locks(in_mbx, __instr_out__, locks_i); // redundant instr popped out
+              end
               if (|(__instr_out__.reg_req & locks_i))->locked_register_access_violation;
             end
 
@@ -184,12 +190,51 @@ module instr_launcher_tb;
 
   endtask
 
+  task automatic verify_mem_op (mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
+    while (in_mbx.num()) begin
+      in_mbx.get(temp_instr);
+      temp_q.push_back(temp_instr);
+    end
+
+    foreach(temp_q[i]) begin
+      if (temp_q[i] === __instr_out__) break;
+      if (temp_q[i].mem_op) ->mem_op_priority_violation;
+    end
+
+    foreach (temp_q[i]) begin
+      in_mbx.put(temp_q[i]);
+    end
+  endtask
+
+  task automatic verify_blocking (mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
+    while (in_mbx.num()) begin
+      in_mbx.get(temp_instr);
+      temp_q.push_back(temp_instr);
+    end
+
+    foreach(temp_q[i]) begin
+      if (temp_q[i] === __instr_out__) break;
+      if (temp_q[i].blocking) ->blocking_priority_violation;
+    end
+
+    foreach (temp_q[i]) begin
+      in_mbx.put(temp_q[i]);
+    end
+  endtask
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-SEQUENTIALS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   always @(locked_register_access_violation) begin
     result_print(0, "Locked Registers Access Denied");
+  end
+
+  always @(mem_op_priority_violation) begin
+    result_print(0, "Memory Operation Instruction Prioritization");
+  end
+
+  always @(blocking_priority_violation) begin
+    result_print(0, "Blocking Instruction Prioritization");
   end
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -206,6 +251,8 @@ module instr_launcher_tb;
   initial begin
     repeat (1000000) @(posedge clk_i);
     result_print(1, "Locked Registers Access Denied");
+    result_print(1, "Memory Operation Instruction Prioritization");
+    result_print(1, "Blocking Instruction Prioritization");
     $finish;
   end
 
