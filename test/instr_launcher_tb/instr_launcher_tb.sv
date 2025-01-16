@@ -107,11 +107,6 @@ module instr_launcher_tb;
 
         instr_in_i.func <= 1 << $urandom_range(0, maverickOne_pkg::TOTAL_FUNCS-1);
         instr_in_i.rd <= $urandom_range(0, NUM_REGS - 1);
-        // instr_in_i.rs1 <= $urandom_range(0, NUM_REGS-1);
-        // instr_in_i.rs2 <= $urandom_range(0, NUM_REGS-1);
-        // instr_in_i.rs3 <= $urandom_range(0, NUM_REGS-1);
-        // instr_in_i.imm <= $urandom;
-        // instr_in_i.pc <= $urandom;
         instr_in_i.blocking <= $urandom;
         instr_in_i.reg_req <= (1 << $urandom_range(
             0, NUM_REGS - 1
@@ -120,7 +115,10 @@ module instr_launcher_tb;
         )) | (1 << $urandom_range(
             0, NUM_REGS - 1
         ));
-
+        $write("instr_in_i.func: 0b%b\n",instr_in_i.func);
+        $write("instr_in_i.rd: 0b%b\n",instr_in_i.rd);
+        $write("instr_in_i.blocking: 0b%b\n",instr_in_i.blocking);
+        $write("instr_in_i.reg_req: 0b%b\n",instr_in_i.reg_req);
         clear_i <= $urandom_range(0, 99) < 2;  // 2% chance of clear
 
         instr_in_valid_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
@@ -186,8 +184,7 @@ module instr_launcher_tb;
 
     foreach (temp_q[i]) begin
       if (temp_q[i] === __instr_out__) break;
-      // else if (temp_q[i].mem_op)->mem_op_priority_violation;
-      if (temp_q[i].rd) ->mem_op_priority_violation; // intentional bug: DO NOT PANIC!!
+      else if (temp_q[i].mem_op)->mem_op_priority_violation;
     end
 
     foreach (temp_q[i]) begin
@@ -205,11 +202,8 @@ module instr_launcher_tb;
 
     foreach (temp_q[i]) begin
       if (temp_q[i] === __instr_out__) break;
-      else if (temp_q[i].blocking) begin
+      else if (temp_q[i].blocking)
         ->blocking_priority_violation;
-        $write("instr_o: %p", __instr_out__);
-      end
-      // if (temp_q[i].rd) ->blocking_priority_violation; // intentional bug: DO NOT PANIC!!
     end
 
     foreach (temp_q[i]) begin
