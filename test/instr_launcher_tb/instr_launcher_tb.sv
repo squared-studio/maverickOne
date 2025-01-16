@@ -35,28 +35,29 @@ module instr_launcher_tb;
   `CREATE_CLK(clk_i, 4ns, 6ns)
 
   // RTL Inputs
-  logic           arst_ni = 1;
-  logic           clear_i = 0;
-  decoded_instr_t instr_in_i;
-  logic           instr_in_valid_i;
-  locks_t         locks_i;
-  logic           instr_out_ready_i;
+  logic                 arst_ni = 1;
+  logic                 clear_i = 0;
+  decoded_instr_t       instr_in_i;
+  logic                 instr_in_valid_i;
+  locks_t               locks_i;
+  logic                 instr_out_ready_i;
 
   // RTL Outputs
-  logic           instr_in_ready_o;
-  decoded_instr_t instr_out_o;
-  logic           instr_out_valid_o;
+  logic                 instr_in_ready_o;
+  decoded_instr_t       instr_out_o;
+  logic                 instr_out_valid_o;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-VARIABLES
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  event           locked_register_access_violation;
-  event           mem_op_priority_violation;
-  event           blocking_priority_violation;
-  int             full_mailbox = 0;
-  decoded_instr_t temp_instr;
-  decoded_instr_t temp_q                           [$];
+  event                 locked_register_access_violation;
+  event                 mem_op_priority_violation;
+  event                 blocking_priority_violation;
+  logic           [2:0] violation_flags = '0;
+  int                   full_mailbox = 0;
+  decoded_instr_t       temp_instr;
+  decoded_instr_t       temp_q                           [$];
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -104,7 +105,7 @@ module instr_launcher_tb;
         @(posedge clk_i);
         locks_i <= $urandom_range(0, (2 ** (NUM_REGS) - 1));  // register locks profile input
 
-        // instr_in_i.func <= maverickOne_pkg::func_t'($urandom);
+        instr_in_i.func <= 1 << $urandom_range(0, maverickOne_pkg::TOTAL_FUNCS-1);
         instr_in_i.rd <= $urandom_range(0, NUM_REGS - 1);
         // instr_in_i.rs1 <= $urandom_range(0, NUM_REGS-1);
         // instr_in_i.rs2 <= $urandom_range(0, NUM_REGS-1);
@@ -139,10 +140,13 @@ module instr_launcher_tb;
         forever begin
           @(posedge clk_i);
           if (arst_ni & ~clear_i) begin
-            if (instr_in_valid_i === 1 & instr_in_ready_o === 1) in_mbx.put(instr_in_i);
-          // end else begin
-          //   while (in_mbx.num()) in_mbx.get(__instr_in__);
-          //   while (out_mbx.num()) out_mbx.get(__instr_out__);
+            if (instr_in_valid_i === 1 && instr_in_ready_o === 1 && (|(instr_in_i.func))) begin
+              in_mbx.put(instr_in_i);
+              $write("Inbox Updated\n");
+            end
+            // end else begin
+            //   while (in_mbx.num()) in_mbx.get(__instr_in__);
+            //   while (out_mbx.num()) out_mbx.get(__instr_out__);
           end
         end
       end
@@ -150,25 +154,69 @@ module instr_launcher_tb;
         forever begin
           @(posedge clk_i);
           if (arst_ni & ~clear_i) begin
-            if (instr_out_valid_o === 1 & instr_out_ready_i === 1) out_mbx.put(instr_out_o);
+            if (instr_out_valid_o === 1 && instr_out_ready_i === 1 && (|(instr_out_o.func))) begin
+              out_mbx.put(instr_out_o);
+              $write("Outbox Updated\n");
+            end
 
             if (out_mbx.num()) begin
               out_mbx.get(__instr_out__);
               if (in_mbx.num()) begin
-                verify_mem_op(in_mbx, __instr_out__); // in_mbx remains unchanged
-                verify_blocking(in_mbx, __instr_out__); // in_mbx remains unchanged
-                cascaded_locks(in_mbx, __instr_out__, locks_i); // redundant instr popped out
+                verify_mem_op(in_mbx, __instr_out__);  // in_mbx remains unchanged
+                verify_blocking(in_mbx, __instr_out__);  // in_mbx remains unchanged
+                cascaded_locks(in_mbx, __instr_out__, locks_i);  // redundant instr popped out
               end
               if (|(__instr_out__.reg_req & locks_i))->locked_register_access_violation;
             end
 
-          // end else begin
-          //   while (in_mbx.num()) in_mbx.get(__instr_in__);
-          //   while (out_mbx.num()) out_mbx.get(__instr_out__);
+            // end else begin
+            //   while (in_mbx.num()) in_mbx.get(__instr_in__);
+            //   while (out_mbx.num()) out_mbx.get(__instr_out__);
           end
         end
       end
     join_none
+  endtask
+
+  task automatic verify_mem_op(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
+    while (in_mbx.num()) begin
+      in_mbx.get(temp_instr);
+      temp_q.push_back(temp_instr);
+    end
+
+    foreach (temp_q[i]) begin
+      if (temp_q[i] === __instr_out__) break;
+      // else if (temp_q[i].mem_op)->mem_op_priority_violation;
+      if (temp_q[i].rd) ->mem_op_priority_violation; // intentional bug: DO NOT PANIC!!
+    end
+
+    foreach (temp_q[i]) begin
+      in_mbx.put(temp_q[i]);
+    end
+
+    while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
+  endtask
+
+  task automatic verify_blocking(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
+    while (in_mbx.num()) begin
+      in_mbx.get(temp_instr);
+      temp_q.push_back(temp_instr);
+    end
+
+    foreach (temp_q[i]) begin
+      if (temp_q[i] === __instr_out__) break;
+      else if (temp_q[i].blocking) begin
+        ->blocking_priority_violation;
+        $write("instr_o: %p", __instr_out__);
+      end
+      // if (temp_q[i].rd) ->blocking_priority_violation; // intentional bug: DO NOT PANIC!!
+    end
+
+    foreach (temp_q[i]) begin
+      in_mbx.put(temp_q[i]);
+    end
+
+    while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
   endtask
 
   task automatic cascaded_locks(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__,
@@ -188,53 +236,26 @@ module instr_launcher_tb;
       in_mbx.put(temp_q[i]);
     end
 
+    while (temp_q.size() > 0) temp_q.pop_front();  // empty the temp_q T-T
   endtask
 
-  task automatic verify_mem_op (mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
-    while (in_mbx.num()) begin
-      in_mbx.get(temp_instr);
-      temp_q.push_back(temp_instr);
-    end
-
-    foreach(temp_q[i]) begin
-      if (temp_q[i] === __instr_out__) break;
-      if (temp_q[i].mem_op) ->mem_op_priority_violation;
-    end
-
-    foreach (temp_q[i]) begin
-      in_mbx.put(temp_q[i]);
-    end
-  endtask
-
-  task automatic verify_blocking (mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__);
-    while (in_mbx.num()) begin
-      in_mbx.get(temp_instr);
-      temp_q.push_back(temp_instr);
-    end
-
-    foreach(temp_q[i]) begin
-      if (temp_q[i] === __instr_out__) break;
-      if (temp_q[i].blocking) ->blocking_priority_violation;
-    end
-
-    foreach (temp_q[i]) begin
-      in_mbx.put(temp_q[i]);
-    end
-  endtask
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-SEQUENTIALS
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   always @(locked_register_access_violation) begin
-    result_print(0, "Locked Registers Access Denied");
+    violation_flags[0] = 1;
+    $write("Error 0\n");
   end
 
   always @(mem_op_priority_violation) begin
-    result_print(0, "Memory Operation Instruction Prioritization");
+    violation_flags[1] = 1;
+    $write("Error 1\n");
   end
 
   always @(blocking_priority_violation) begin
-    result_print(0, "Blocking Instruction Prioritization");
+    violation_flags[2] = 1;
+    $write("Error 2\n");
   end
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,10 +270,17 @@ module instr_launcher_tb;
   end
 
   initial begin
-    repeat (1000000) @(posedge clk_i);
-    result_print(1, "Locked Registers Access Denied");
-    result_print(1, "Memory Operation Instruction Prioritization");
-    result_print(1, "Blocking Instruction Prioritization");
+    repeat (15) @(posedge clk_i);
+    result_print(~violation_flags[0], "Locked Registers Access Denied");
+    result_print(~violation_flags[1], "Memory Operation Instruction Prioritization");
+    result_print(~violation_flags[2], "Blocking Instruction Prioritization");
+    $finish;
+  end
+
+  initial begin
+    // #1ms;
+    repeat (150001) @(posedge clk_i);
+    result_print(0, "FATAL TIMEOUT");
     $finish;
   end
 
