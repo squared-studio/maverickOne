@@ -47,6 +47,10 @@ module branch_target_buffer #(
   reduced_addr_t next_addr_buffer[NUM_BTBL];
   // Valid bits for buffer entries
   logic [NUM_BTBL-1:0] valid_buffer;
+  // Strength bits for buffer entries
+  logic [NUM_BTBL-1:0] strength_buffer;
+  // Valid + Strength bits for buffer entries
+  logic [1:0] valid_strength [NUM_BTBL];
   // Counter for buffer entries
   logic [$clog2(NUM_BTBL)-1:0] buffer_counter;
 
@@ -68,6 +72,13 @@ module branch_target_buffer #(
   logic [$clog2(NUM_BTBL)-1:0] empty_index;
   // Index of row to write in buffer
   logic [$clog2(NUM_BTBL)-1:0] write_index;
+
+  // Input and Output state for State Decider - {valid, strength}
+  logic [1:0] input_state, output_state;
+  //State Definitions
+  parameter logic[1:0]  INVALID       = 2'b01,  // Valid and weak strength
+                        VALID_WEAK    = 2'b10,  // Valid and strong strength
+                        VALID_STRONG  = 2'b11;   // Invalid entry
 
   // Flag to indicate if an empty row is found
   logic empty_found;
@@ -93,11 +104,28 @@ module branch_target_buffer #(
   always_comb addr_mismatch = (current_addr_i + 4 != next_addr_i);
 
   // Update table if there is a jump and addresses do not match
-  always_comb update_table_o = is_jump_i & (addr_mismatch ^ match_found);
+  always_comb update_table_o = is_jump_i & (addr_mismatch ^ (match_found & ~input_state[0]));
 
   // Determine the row index to write in buffer
   always_comb
     write_index = addr_mismatch ? (empty_found ? empty_index : buffer_counter) : match_index;
+
+  for(genvar i = 0; i < NUM_BTBL; i++) begin : g_valid_strength
+    assign valid_strength[i] = {valid_buffer[i], strength_buffer[i]};
+  end
+
+  // Multiplexer for choosing input state for FSM
+  always_comb input_state = valid_strength[write_index];
+
+  // State Decider
+  always_comb begin
+    case (input_state)
+      INVALID:      output_state = addr_mismatch ? VALID_STRONG : INVALID;
+      VALID_WEAK:   output_state = addr_mismatch ? VALID_STRONG : INVALID;
+      VALID_STRONG: output_state = addr_mismatch ? VALID_STRONG : VALID_WEAK;
+      default:      output_state = INVALID;
+    endcase
+  end
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -154,7 +182,16 @@ module branch_target_buffer #(
       if (~arst_ni) begin
         valid_buffer[i] <= '0;
       end else if (write_enable[i]) begin
-        valid_buffer[i] <= addr_mismatch;
+        valid_buffer[i] <= output_state[1];
+      end
+    end
+
+    // Sequential logic to update strength bits for buffer entries
+    always_ff @(posedge clk_i or negedge arst_ni) begin
+      if (~arst_ni) begin
+        strength_buffer[i] <= '1;
+      end else if (valid_buffer[i]) begin
+        strength_buffer[i] <= output_state[0];
       end
     end
   end
