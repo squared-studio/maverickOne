@@ -90,6 +90,7 @@ module instr_launcher_tb;
     arst_ni           <= '0;
     clk_i             <= '0;
     clear_i           <= '0;
+    locks_i           <= '0;
     instr_in_i        <= '0;
     instr_in_valid_i  <= '0;
     instr_out_ready_i <= '0;
@@ -127,13 +128,17 @@ module instr_launcher_tb;
         $write("[%.3t] Driver time\n", $realtime);
         $write("clear_i: 0b%b\n", clear_i);
         $write("instr_in_valid_i: 0b%b\n", instr_in_valid_i);
-        // $write("instr_out_ready_i: 0b%b\n", instr_out_ready_i);
+        $write("instr_in_ready_o: 0b%b\n", instr_in_ready_o);
+        $write("instr_out_ready_i: 0b%b\n", instr_out_ready_i);
+        $write("instr_out_valid_o 0b%b\n", instr_out_valid_o);
         $write("locks_i: 0b%b\n", locks_i);
         // $write("instr_in_i.func: 0b%b\n", instr_in_i.func);
         // $write("instr_in_i.rd: 0b%b\n", instr_in_i.rd);
         // $write("instr_in_i.blocking: 0b%b\n", instr_in_i.blocking);
         // $write("instr_in_i.reg_req: 0b%b\n", instr_in_i.reg_req);
         $write("instr_in_i: %p\n", instr_in_i);
+        $write("\n");
+        $write("instr_out_o: %p\n", instr_out_o);
         $write("\n");
       end
     join_none
@@ -151,16 +156,12 @@ module instr_launcher_tb;
         if (~arst_ni | clear_i) __instr_out__ = '0;
         else if (arst_ni & ~clear_i) begin
 
-          if (instr_out_valid_o & instr_out_ready_i) begin
-            $write("Output VALID READY\n");
-            if (__instr_out__ === instr_out_o) begin
-              $write("instr_out_rtl: %p\n", instr_out_o);
-              $write("instr_out_tb : %p\n", __instr_out__);
-              instr_mismatch_flag = '1;
-            end
-          end
 
-          $write("instr_out_rtl: %p\n", instr_out_o);
+          if (__instr_out__ !== instr_out_o) begin
+            $write("instr_out_rtl: %p\n", instr_out_o);
+            $write("instr_out_tb : %p\n", __instr_out__);
+            instr_mismatch_flag = '1;
+          end
 
           if (instr_in_valid_i &
           instr_in_ready_o &
@@ -178,11 +179,11 @@ module instr_launcher_tb;
 
             if (pipeline_stage[i].blocking) begin
 
-              $write("Overlap: 0b%b\n", |(pipeline_stage[i].reg_req & locks_i));
+              $write("Overlap at %03d: 0b%b\n", i, |(pipeline_stage[i].reg_req & locks_i));
               if (|(pipeline_stage[i].reg_req & locks_i)) begin
-              __instr_out__ = 'x;
+                __instr_out__ = 'x;
                 break;
-              end else begin
+              end else if (instr_out_ready_i) begin
                 __instr_out__ = pipeline_stage[i];
                 pipeline_stage.delete(i);
                 break;
