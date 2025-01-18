@@ -17,13 +17,13 @@ module branch_target_buffer #(
     input logic clk_i,   // Clock input
     input logic arst_ni, // Asynchronous reset input
 
-    input logic [XLEN-1:0] current_addr_i,  // Current address (EXEC) input
-    input logic [XLEN-1:0] next_addr_i,     // Next address (EXEC) input
-    input logic [XLEN-1:0] pc_i,            // Program counter (IF) input
-    input logic            is_jump_i,       // Is jump/branch (IF) input
+    input logic [XLEN-1:0] current_addr_i,   // Current address (EXEC) input
+    input logic [XLEN-1:0] next_addr_i,      // Next address (EXEC) input
+    input logic [XLEN-1:0] pc_i,             // Program counter (IF) input
+    input logic            is_jump_i,        // Is jump/branch (IF) input
 
     output logic            match_found_o,   // Found match in buffer output
-    output logic            update_table_o,  // Table update event output
+    output logic            flush_o,         // Pipeline flush signal output
     output logic [XLEN-1:0] next_pc_o        // Next program counter (in case of jump) output
 );
 
@@ -84,6 +84,8 @@ module branch_target_buffer #(
   logic empty_found;
   // Flag to indicate if a match is found
   logic match_found;
+  // Table update event
+  logic update_table;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-ASSIGNMENTS
@@ -95,16 +97,19 @@ module branch_target_buffer #(
   end
 
   // Output match_found signal if a match is found or table is updated
-  always_comb match_found_o = match_found | update_table_o;
+  always_comb match_found_o = match_found | flush_o;
 
   // Output next program counter based on table update or buffer content
-  always_comb next_pc_o = update_table_o ? next_addr_i : {next_addr_buffer[match_index], 2'b00};
+  always_comb next_pc_o = flush_o ? next_addr_i : {next_addr_buffer[match_index], 2'b00};
 
   // Check if next address is not equal to current address + 4
   always_comb addr_mismatch = (current_addr_i + 4 != next_addr_i);
 
-  // Update table if there is a jump and addresses do not match
-  always_comb update_table_o = is_jump_i & (addr_mismatch ^ (match_found & ~input_state[0]));
+  // Flush buffer if there's a new jump or buffer entry is incorrect
+  always_comb flush_o = is_jump_i & (addr_mismatch ^ match_found);
+
+  // Update table if there's a flush EXCEPT when VALID_STRONG
+  always_comb update_table = flush_o & ~(&input_state);
 
   // Determine the row index to write in buffer
   always_comb
@@ -137,7 +142,7 @@ module branch_target_buffer #(
       .ELEM_WIDTH(1)
   ) u_demux (
       .index_i(write_index),
-      .data_i (update_table_o),
+      .data_i (update_table),
       .out_o  (write_enable)
   );
 

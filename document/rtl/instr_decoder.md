@@ -33,7 +33,7 @@ See the [ISA Manual](https://riscv.org/wp-content/uploads/2019/12/riscv-spec-201
 ## Parameters
 |Name|Type|Dimension|Default Value|Description|
 |-|-|-|-|-|
-|XLEN|int||maverickOne_pkg::XLEN| interger register width|
+|XLEN|int||maverickOne_pkg::XLEN| Integer register width|
 |decoded_instr_t|type||maverickOne_pkg::decoded_instr_t| type definition of decoded instruction|
 
 ## Ports
