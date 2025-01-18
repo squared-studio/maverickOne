@@ -32,5 +32,5 @@ helping to predict the next instruction address in case of a branch or jump.
 |pc_i|input|logic [XLEN-1:0]||Program counter (IF) input|
 |is_jump_i|input|logic||Is jump/branch (IF) input|
 |match_found_o|output|logic||Found match in buffer output|
-|update_table_o|output|logic||Table update event output|
+|flush_o|output|logic||Pipeline flush signal output|
 |next_pc_o|output|logic [XLEN-1:0]||Next program counter (in case of jump) output|

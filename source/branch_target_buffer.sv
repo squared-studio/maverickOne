@@ -17,13 +17,13 @@ module branch_target_buffer #(
     input logic clk_i,   // Clock input
     input logic arst_ni, // Asynchronous reset input
 
-    input logic [XLEN-1:0] current_addr_i,  // Current address (EXEC) input
-    input logic [XLEN-1:0] next_addr_i,     // Next address (EXEC) input
-    input logic [XLEN-1:0] pc_i,            // Program counter (IF) input
-    input logic            is_jump_i,       // Is jump/branch (IF) input
+    input logic [XLEN-1:0] current_addr_i,   // Current address (EXEC) input
+    input logic [XLEN-1:0] next_addr_i,      // Next address (EXEC) input
+    input logic [XLEN-1:0] pc_i,             // Program counter (IF) input
+    input logic            is_jump_i,        // Is jump/branch (IF) input
 
     output logic            match_found_o,   // Found match in buffer output
-    output logic            update_table_o,  // Table update event output
+    output logic            flush_o,         // Pipeline flush signal output
     output logic [XLEN-1:0] next_pc_o        // Next program counter (in case of jump) output
 );
 
@@ -47,6 +47,10 @@ module branch_target_buffer #(
   reduced_addr_t next_addr_buffer[NUM_BTBL];
   // Valid bits for buffer entries
   logic [NUM_BTBL-1:0] valid_buffer;
+  // Strength bits for buffer entries
+  logic [NUM_BTBL-1:0] strength_buffer;
+  // Valid + Strength bits for buffer entries
+  logic [1:0] valid_strength [NUM_BTBL];
   // Counter for buffer entries
   logic [$clog2(NUM_BTBL)-1:0] buffer_counter;
 
@@ -69,10 +73,19 @@ module branch_target_buffer #(
   // Index of row to write in buffer
   logic [$clog2(NUM_BTBL)-1:0] write_index;
 
+  // Input and Output state for State Decider - {valid, strength}
+  logic [1:0] input_state, output_state;
+  //State Definitions
+  parameter logic[1:0]  INVALID       = 2'b01,  // Valid and weak strength
+                        VALID_WEAK    = 2'b10,  // Valid and strong strength
+                        VALID_STRONG  = 2'b11;   // Invalid entry
+
   // Flag to indicate if an empty row is found
   logic empty_found;
   // Flag to indicate if a match is found
   logic match_found;
+  // Table update event
+  logic update_table;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-ASSIGNMENTS
@@ -84,20 +97,40 @@ module branch_target_buffer #(
   end
 
   // Output match_found signal if a match is found or table is updated
-  always_comb match_found_o = match_found | update_table_o;
+  always_comb match_found_o = match_found | flush_o;
 
   // Output next program counter based on table update or buffer content
-  always_comb next_pc_o = update_table_o ? next_addr_i : {next_addr_buffer[match_index], 2'b00};
+  always_comb next_pc_o = flush_o ? next_addr_i : {next_addr_buffer[match_index], 2'b00};
 
   // Check if next address is not equal to current address + 4
   always_comb addr_mismatch = (current_addr_i + 4 != next_addr_i);
 
-  // Update table if there is a jump and addresses do not match
-  always_comb update_table_o = is_jump_i & (addr_mismatch ^ match_found);
+  // Flush buffer if there's a new jump or buffer entry is incorrect
+  always_comb flush_o = is_jump_i & (addr_mismatch ^ match_found);
+
+  // Update table if there's a flush EXCEPT when VALID_STRONG
+  always_comb update_table = flush_o & ~(&input_state);
 
   // Determine the row index to write in buffer
   always_comb
     write_index = addr_mismatch ? (empty_found ? empty_index : buffer_counter) : match_index;
+
+  for(genvar i = 0; i < NUM_BTBL; i++) begin : g_valid_strength
+    assign valid_strength[i] = {valid_buffer[i], strength_buffer[i]};
+  end
+
+  // Multiplexer for choosing input state for FSM
+  always_comb input_state = valid_strength[write_index];
+
+  // State Decider
+  always_comb begin
+    case (input_state)
+      INVALID:      output_state = addr_mismatch ? VALID_STRONG : INVALID;
+      VALID_WEAK:   output_state = addr_mismatch ? VALID_STRONG : INVALID;
+      VALID_STRONG: output_state = addr_mismatch ? VALID_STRONG : VALID_WEAK;
+      default:      output_state = INVALID;
+    endcase
+  end
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -109,7 +142,7 @@ module branch_target_buffer #(
       .ELEM_WIDTH(1)
   ) u_demux (
       .index_i(write_index),
-      .data_i (update_table_o),
+      .data_i (update_table),
       .out_o  (write_enable)
   );
 
@@ -154,7 +187,16 @@ module branch_target_buffer #(
       if (~arst_ni) begin
         valid_buffer[i] <= '0;
       end else if (write_enable[i]) begin
-        valid_buffer[i] <= addr_mismatch;
+        valid_buffer[i] <= output_state[1];
+      end
+    end
+
+    // Sequential logic to update strength bits for buffer entries
+    always_ff @(posedge clk_i or negedge arst_ni) begin
+      if (~arst_ni) begin
+        strength_buffer[i] <= '1;
+      end else if (valid_buffer[i]) begin
+        strength_buffer[i] <= output_state[0];
       end
     end
   end
