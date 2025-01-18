@@ -7,6 +7,7 @@
 [`exe_m64_mult`](exe_m64_mult.md)
 [`fixed_priority_arbiter`](fixed_priority_arbiter.md)
 [`instr_decoder`](instr_decoder.md)
+[`instr_fetch`](instr_fetch.md)
 [`instr_launcher`](instr_launcher.md)
 [`maverickOne`](maverickOne.md)
 [`pipeline`](pipeline.md)

@@ -21,16 +21,17 @@ helping to predict the next instruction address in case of a branch or jump.
 |-|-|-|-|-|
 |NUM_BTBL|int||maverickOne_pkg::NUM_BTBL|Number of branch target buffer lines|
 |XLEN|int||maverickOne_pkg::XLEN|Integer register width|
+|addr_t|type||logic [XLEN-1:0]|Address type|
 
 ## Ports
 |Name|Direction|Type|Dimension|Description|
 |-|-|-|-|-|
 |clk_i|input|logic||Clock input|
 |arst_ni|input|logic||Asynchronous reset input|
-|current_addr_i|input|logic [XLEN-1:0]||Current address (EXEC) input|
-|next_addr_i|input|logic [XLEN-1:0]||Next address (EXEC) input|
-|pc_i|input|logic [XLEN-1:0]||Program counter (IF) input|
+|current_addr_i|input|addr_t||Current address (EXEC) input|
+|next_addr_i|input|addr_t||Next address (EXEC) input|
+|pc_i|input|addr_t||Program counter (IF) input|
 |is_jump_i|input|logic||Is jump/branch (IF) input|
 |match_found_o|output|logic||Found match in buffer output|
 |flush_o|output|logic||Pipeline flush signal output|
-|next_pc_o|output|logic [XLEN-1:0]||Next program counter (in case of jump) output|
+|next_pc_o|output|addr_t||Next program counter (in case of jump) output|

@@ -12,19 +12,20 @@ See LICENSE file in the project root for full license information
 
 module branch_target_buffer #(
     parameter int NUM_BTBL = maverickOne_pkg::NUM_BTBL,  // Number of branch target buffer lines
-    parameter int XLEN     = maverickOne_pkg::XLEN       // Integer register width
+    parameter int XLEN     = maverickOne_pkg::XLEN,       // Integer register width
+    localparam type addr_t = logic [XLEN-1:0]  // Address type
 ) (
     input logic clk_i,   // Clock input
     input logic arst_ni, // Asynchronous reset input
 
-    input logic [XLEN-1:0] current_addr_i,   // Current address (EXEC) input
-    input logic [XLEN-1:0] next_addr_i,      // Next address (EXEC) input
-    input logic [XLEN-1:0] pc_i,             // Program counter (IF) input
+    input addr_t current_addr_i,   // Current address (EXEC) input
+    input addr_t next_addr_i,      // Next address (EXEC) input
+    input addr_t pc_i,             // Program counter (IF) input
     input logic            is_jump_i,        // Is jump/branch (IF) input
 
     output logic            match_found_o,   // Found match in buffer output
     output logic            flush_o,         // Pipeline flush signal output
-    output logic [XLEN-1:0] next_pc_o        // Next program counter (in case of jump) output
+    output addr_t next_pc_o        // Next program counter (in case of jump) output
 );
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,10 +33,6 @@ module branch_target_buffer #(
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   typedef logic [XLEN-1:2] reduced_addr_t;  // Reduced address type (excluding last 2 bits)
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //-SIGNALS
-  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   ///////////////////////////////////////////////
   // REGISTERS
@@ -76,9 +73,9 @@ module branch_target_buffer #(
   // Input and Output state for State Decider - {valid, strength}
   logic [1:0] input_state, output_state;
   //State Definitions
-  parameter logic[1:0]  INVALID       = 2'b01,  // Valid and weak strength
-                        VALID_WEAK    = 2'b10,  // Valid and strong strength
-                        VALID_STRONG  = 2'b11;   // Invalid entry
+  parameter logic[1:0]  INVALID       = 2'b01,  // Invalid entry
+                        VALID_WEAK    = 2'b10,  // Valid and weak strength
+                        VALID_STRONG  = 2'b11;  // Valid and strong strength
 
   // Flag to indicate if an empty row is found
   logic empty_found;
