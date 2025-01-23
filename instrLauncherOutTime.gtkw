@@ -1,0 +1,99 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Thu Jan 23 21:46:56 2025
+[*]
+[dumpfile] "C:\Users\tahmeed\Desktop\Wasteland\maverickOne\build\dump.vcd"
+[dumpfile_mtime] "Thu Jan 23 21:38:53 2025"
+[dumpfile_size] 199407
+[savefile] "C:\Users\tahmeed\Desktop\Wasteland\maverickOne\instrLauncherOutTime.gtkw"
+[timestart] 373200
+[size] 1912 1001
+[pos] -1 -1
+*-16.000000 470000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] instr_launcher_tb.
+[treeopen] instr_launcher_tb.u_instr_lnchr_1.
+[treeopen] instr_launcher_tb.u_instr_lnchr_1.g_splits[0].
+[treeopen] instr_launcher_tb.u_instr_lnchr_1.g_splits[1].
+[treeopen] instr_launcher_tb.u_instr_lnchr_1.g_splits[2].
+[treeopen] instr_launcher_tb.u_instr_lnchr_1.g_splits[3].
+[sst_width] 197
+[signals_width] 1113
+[sst_expanded] 1
+[sst_vpaned_height] 294
+@28
+instr_launcher_tb.arst_ni
+@29
+instr_launcher_tb.clk_i
+@22
+instr_launcher_tb.instr_in_i[374:0]
+@28
+instr_launcher_tb.instr_in_valid_i
+instr_launcher_tb.instr_in_ready_o
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_in_i[374:0]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_in_valid_i
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_in_ready_o
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_out_main_o[2999:2625]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_out_main_valid_o
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_out_main_ready_i
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_out_secondary_o[749:375]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_out_secondary_valid_o
+instr_launcher_tb.u_instr_lnchr_1.g_splits[0].u_pipeline_split.data_out_secondary_ready_i
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_in_i[374:0]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_in_valid_i
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_in_ready_o
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_out_main_o[2624:2250]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_out_main_valid_o
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_out_main_ready_i
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_out_secondary_o[1124:750]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_out_secondary_valid_o
+instr_launcher_tb.u_instr_lnchr_1.g_splits[1].u_pipeline_split.data_out_secondary_ready_i
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_in_i[374:0]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_in_valid_i
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_in_ready_o
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_out_main_o[2249:1875]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_out_main_valid_o
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_out_main_ready_i
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_out_secondary_o[1499:1125]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_out_secondary_valid_o
+instr_launcher_tb.u_instr_lnchr_1.g_splits[2].u_pipeline_split.data_out_secondary_ready_i
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_in_i[374:0]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_in_valid_i
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_in_ready_o
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_out_main_o[1874:1500]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_out_main_valid_o
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_out_main_ready_i
+@22
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_out_secondary_o[1874:1500]
+@28
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_out_secondary_valid_o
+instr_launcher_tb.u_instr_lnchr_1.g_splits[3].u_pipeline_split.data_out_secondary_ready_i
+@22
+instr_launcher_tb.__instr_out__[374:0]
+instr_launcher_tb.instr_out_o[374:0]
+@28
+instr_launcher_tb.instr_out_valid_o
+instr_launcher_tb.instr_out_ready_i
+[pattern_trace] 1
+[pattern_trace] 0
