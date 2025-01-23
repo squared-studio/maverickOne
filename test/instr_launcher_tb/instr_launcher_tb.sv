@@ -107,7 +107,8 @@ module instr_launcher_tb;
     fork
       forever begin
         @(posedge clk_i);
-        clear_i <= $urandom_range(0, 99) < 2;  // 2% chance of clear
+        // clear_i <= $urandom_range(0, 99) < 2;  // 2% chance of clear
+        clear_i <= '0;  // 2% chance of clear
         instr_in_valid_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
         instr_out_ready_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
         locks_i <= $urandom;  // register locks profile input
@@ -161,6 +162,7 @@ module instr_launcher_tb;
             $write("instr_out_rtl: %p\n", instr_out_o);
             $write("instr_out_tb : %p\n", __instr_out__);
             instr_mismatch_flag = '1;
+            $fatal(1, "sata");
           end
 
           if (instr_in_valid_i &
@@ -175,7 +177,7 @@ module instr_launcher_tb;
               "pipeline%02d:\n%p\nreg_req: 0b%b\n", i, pipeline_stage[i], pipeline_stage[i].reg_req
           );
 
-          foreach (pipeline_stage[i]) begin
+          for (int i = 0; i < pipeline_stage.size(); i++) begin
 
             if (pipeline_stage[i].blocking) begin
 
@@ -192,30 +194,30 @@ module instr_launcher_tb;
             end else if (pipeline_stage[i].mem_op) begin
 
               if (memory_blocked === '1) begin
-                // __instr_out__ = 'x;
-                // continue;
-                //     end else begin
-                //       if (~|(pipeline_stage[i].reg_req & locks_i)) begin
-                //         __instr_out__ = pipeline_stage[i];
-                //         pipeline_stage.delete(i);
-                //         break;
-                //       end else begin
-                //         memory_blocked = '1;
-                //         __instr_out__  = 'x;
-                //         continue;
-                //       end
+                __instr_out__ = 'x;
+                continue;
+              end else begin
+                if (~|(pipeline_stage[i].reg_req & locks_i)) begin
+                  __instr_out__ = pipeline_stage[i];
+                  pipeline_stage.delete(i);
+                  break;
+                end else begin
+                  memory_blocked = '1;
+                  __instr_out__  = 'x;
+                  continue;
+                end
               end
 
             end else begin
 
               if (~|(pipeline_stage[i].reg_req & locks_i)) begin
-                // __instr_out__ = pipeline_stage[i];
-                // pipeline_stage.delete(i);
-                // break;
-                //     end else begin
-                //       locks_i = (1 << pipeline_stage[i].rd) | locks_i;
-                //       __instr_out__ = 'x;
-                //       continue;
+                __instr_out__ = pipeline_stage[i];
+                pipeline_stage.delete(i);
+                break;
+              end else begin
+                locks_i = (1 << pipeline_stage[i].rd) | locks_i;
+                __instr_out__ = 'x;
+                continue;
               end
 
             end
@@ -224,10 +226,10 @@ module instr_launcher_tb;
 
           $write("instr_out_tb : %p\n", __instr_out__);
 
-          // end else if (clear_i) begin
-          //   while (pipeline_stage.size()) begin
-          //     pipeline_stage.pop_front();
-          //   end
+        end else if (clear_i) begin
+          while (pipeline_stage.size()) begin
+            pipeline_stage.pop_front();
+          end
         end
         $write("\n");
       end
@@ -265,6 +267,7 @@ module instr_launcher_tb;
   end
 
   initial begin
+    if (instr_mismatch_flag) $finish;
     repeat (11) @(posedge clk_i);
     // result_print(~violation_flags[0], "Locked Registers Access Denied");
     // result_print(~violation_flags[1], "Memory Operation Instruction Prioritization");
