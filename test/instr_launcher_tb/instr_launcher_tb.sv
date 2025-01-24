@@ -35,31 +35,32 @@ module instr_launcher_tb;
   `CREATE_CLK(clk_i, 4ns, 6ns)
 
   // RTL Inputs
-  logic                        arst_ni = 1;
-  logic                        clear_i = 0;
-  decoded_instr_t              instr_in_i;
-  logic                        instr_in_valid_i;
-  locks_t                      locks_i;
-  logic                        instr_out_ready_i;
+  logic arst_ni = 1;
+  logic clear_i = 0;
+  decoded_instr_t instr_in_i;
+  logic instr_in_valid_i;
+  locks_t locks_i;
+  logic instr_out_ready_i;
 
   // RTL Outputs
-  logic                        instr_in_ready_o;
-  decoded_instr_t              instr_out_o;
-  logic                        instr_out_valid_o;
+  logic instr_in_ready_o;
+  decoded_instr_t instr_out_o;
+  logic instr_out_valid_o;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-VARIABLES
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  decoded_instr_t              __instr_out__;
-  logic                        instr_mismatch_flag;
-  int                          NO_max = maverickOne_pkg::NUM_OUTSTANDING + 1;
-  decoded_instr_t              pipeline_stage                                [NO_max];
-  logic           [NO_max-1:0] instr_validity;
-  logic           [NO_max-1:0] instr_writable;
-  int                          pipeline_fullness;
-  logic                        pipeline_full;
-  logic                        memory_blocked;
+  decoded_instr_t __instr_out__;
+  logic instr_mismatch_flag;
+  const int NO_max = maverickOne_pkg::NUM_OUTSTANDING + 1;
+  decoded_instr_t pipeline_stage[maverickOne_pkg::NUM_OUTSTANDING + 1];
+  bit [maverickOne_pkg::NUM_OUTSTANDING:0] instr_validity;
+  logic [maverickOne_pkg::NUM_OUTSTANDING:0] instr_wren;
+  bit instr_readyness;
+  int pipeline_fullness;
+  logic pipeline_full;
+  logic memory_blocked;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -127,11 +128,11 @@ module instr_launcher_tb;
 
         // Display Driver Outputs
         $write("[%.3t] Driver time\n", $realtime);
-        $write("clear_i: 0b%b\n", clear_i);
-        $write("instr_in_i: %p\n", instr_in_i);
+        // // $write("clear_i: 0b%b\n", clear_i);
+        // $write("instr_in_i: %p\n", instr_in_i);
         $write("instr_in_valid_i: 0b%b\n", instr_in_valid_i);
         $write("instr_in_ready_o: 0b%b\n", instr_in_ready_o);
-        $write("instr_out_o: %p\n", instr_out_o);
+        // $write("instr_out_o: %p\n", instr_out_o);
         $write("instr_out_valid_o 0b%b\n", instr_out_valid_o);
         $write("instr_out_ready_i: 0b%b\n", instr_out_ready_i);
         $write("\n");
@@ -141,7 +142,8 @@ module instr_launcher_tb;
 
   task automatic start_in_out_monitor();
     instr_validity = '0;
-    instr_writable = '1;
+    instr_readyness = '0;
+    instr_wren = '1;
     instr_mismatch_flag = '0;
     pipeline_fullness = 0;
     pipeline_full = '0;
@@ -153,80 +155,125 @@ module instr_launcher_tb;
         $write("[%.3t] Monitor time\n", $realtime);
 
         if (~arst_ni | clear_i) begin
-          __instr_out__  <= 'x;
+          // __instr_out__ <= 'x;
           instr_validity <= '0;
-          instr_writable <= '1;
+          instr_wren <= '1;
         end else if (arst_ni & ~clear_i) begin
 
-          if (instr_in_valid_i && instr_in_ready_o && ~pipeline_full) begin
-            pipeline_stage[0] <= instr_in_i;
-            instr_writable[0] <= '0;
+          for (int i = NO_max - 1; i >= 0; i--) begin
+            $write(
+                // "pipeline%02d:\n%p\nreg_req: 0b%b\n", i, pipeline_stage[i], pipeline_stage[i].reg_req
+                "pipeline%02d:\treg_req: 0b%0d\tmem_op: 0b%b\tblocking: 0b%b\t", i,
+                pipeline_stage[i].reg_req, pipeline_stage[i].mem_op, pipeline_stage[i].blocking);
+            $write("writable: 0b%b\n", instr_wren[i]);
           end
 
-          for (int i = pipeline_fullness - 1; i >= 0; i++)
-          $write(
-              "pipeline%02d:\n%p\nreg_req: 0b%b\n", i, pipeline_stage[i], pipeline_stage[i].reg_req
-          );
+          for (int i = NO_max - 1; i >= 0; i--) begin
+            if (~instr_wren[i]) begin
 
-          for (int i = pipeline_fullness - 1; i >= 0; i++) begin
+              instr_validity[i] = bit'(~|(pipeline_stage[i].reg_req & locks_i));
 
-            if (~instr_out_ready_i) begin
+              if (pipeline_stage[i].blocking) begin
 
-              __instr_out__  = 'x;
-              instr_validity = '0;
-              break;
-
-            end else if (pipeline_stage[i].blocking) begin
-
-              if (~|(pipeline_stage[i].reg_req & locks_i) && ~instr_writable[i]) begin
-                __instr_out__ = pipeline_stage[i];
-                instr_validity[i] = '1;
-                instr_writable[i] = '1;
-                break;
-              end else begin
-                if (~instr_writable[i]) begin
-                  if (i + 1 == NO_max) begin
-                    pipeline[i+1] <= pipeline[i];
-                    instr_writable[i+1] <= instr_writable[i];
-                    pipeline_fullness++;
-                  end else begin
-                    instr_validity[i] = '0;
-                  end
+                if (instr_validity[i] && instr_out_ready_i) begin
+                  __instr_out__ = pipeline_stage[i];
+                  instr_wren[i] = '1;
+                  pipeline_fullness--;
+                  break;
                 end else begin
-                  __instr_out__ = 'x;
+                  __instr_out__ = pipeline_stage[NO_max-1];
+                  if (i < NO_max - 1) begin
+                    if (instr_wren[i+1]) begin
+                      pipeline_stage[i+1] <= pipeline_stage[i];
+                      instr_wren[i+1] <= instr_wren[i];
+                      instr_wren[i] = '1;
+                    end
+                  end
+                  locks_i = '1;
+                  break;
                 end
-                break;
+
+              end else if (pipeline_stage[i].mem_op) begin
+
+                if (instr_validity[i] && instr_out_ready_i && ~memory_blocked) begin
+                  __instr_out__ = pipeline_stage[i];
+                  instr_wren[i] = '1;
+                  pipeline_fullness--;
+                  break;
+                end else begin
+                  __instr_out__  = pipeline_stage[NO_max-1];
+                  memory_blocked = '1;
+                  if (i < NO_max - 1) begin
+                    if (instr_wren[i+1]) begin
+                      pipeline_stage[i+1] <= pipeline_stage[i];
+                      instr_wren[i+1] <= instr_wren[i];
+                      instr_wren[i] = '1;
+                    end
+                  end
+                  locks_i = (1 << pipeline_stage[i].rd) | locks_i;
+                  continue;
+                end
+
+              end else if (pipeline_stage[i] !== 'x) begin
+
+                if (instr_validity[i] && instr_out_ready_i) begin
+                  __instr_out__ = pipeline_stage[i];
+                  instr_wren[i] = '1;
+                  pipeline_fullness--;
+                  break;
+                end else begin
+                  __instr_out__ = pipeline_stage[NO_max-1];
+                  if (i < NO_max - 1) begin
+                    if (instr_wren[i+1]) begin
+                      pipeline_stage[i+1] <= pipeline_stage[i];
+                      instr_wren[i+1] <= instr_wren[i];
+                      instr_wren[i] = '1;
+                    end
+                  end
+                  locks_i = (1 << pipeline_stage[i].rd) | locks_i;
+                  continue;
+                end
+
               end
 
-            end else
-            if (pipeline_stage[i].mem_op) begin
-
-
-
-            end else begin
-
-
-
             end
-
           end
 
           if (pipeline_fullness == NO_max) pipeline_full = '1;
           else pipeline_full = '0;
 
-          // if ((instr_validity !== instr_out_valid_o) || (__instr_out__ !== instr_out_o)) begin
-          //   $write("instr_out_rtl: valid: 0b%b\n%p\n", instr_out_valid_o, instr_out_o);
-          //   $write("instr_out_tb : valid: 0b%b\n%p\n", instr_validity, __instr_out__);
-          //   instr_mismatch_flag = '1;
-          //   // $fatal(1, "sata");
-          // end
+          instr_readyness = ~pipeline_full;
+          // if (instr_in_valid_i && (instr_in_ready_o && instr_readyness)) begin
+          if (instr_in_valid_i && instr_readyness && instr_wren[0]) begin
+            pipeline_stage[0] <= instr_in_i;
+            instr_wren[0] <= '0;
+            pipeline_fullness++;
+          end
 
-          $write("instr_out_tb : %p\n", __instr_out__);
+          if (instr_out_valid_o && instr_out_ready_i && (__instr_out__ !== instr_out_o)) begin
+            instr_mismatch_flag = '1;
+            $write("[%.3t] Mismatch: 0b%b\n", $realtime, instr_mismatch_flag);
+            $write("instr_out_tb : %p\nValid: 0b%b\tmem_op: 0b%b\tblocking: 0b%b\n",
+                   __instr_out__.reg_req, instr_validity, __instr_out__.mem_op,
+                   __instr_out__.blocking);
+            $write("instr_out_rtl: %p\nValid: 0b%b\tmem_op: 0b%b\tblocking: 0b%b\n",
+                   instr_out_o.reg_req, instr_out_valid_o, instr_out_o.mem_op,
+                   instr_out_o.blocking);
+            // $fatal(1, "Mismatch found");
+          end
+
+          // $write("instr_out_tb : %p\n", __instr_out__);
+          // $write("instr_out_rtl: %p\n", instr_out_o);
+          $write("instr_out_tb : %0d\n", __instr_out__.reg_req);
+          $write("instr_out_rtl: %0d\n", instr_out_o.reg_req);
 
         end else if (clear_i) begin
-          while (pipeline_stage.size()) begin
-            pipeline_stage.pop_front();
+          for (int i = NO_max - 1; i >= 0; i--) begin
+            pipeline_stage[i] = 'x;
           end
+          pipeline_full = '0;
+          instr_wren = '1;
+          instr_validity = '1;
         end
         $write("\n");
       end
@@ -245,7 +292,7 @@ module instr_launcher_tb;
   end
 
   initial begin
-    repeat (21) @(posedge clk_i);
+    repeat (51) @(posedge clk_i);
     result_print(~instr_mismatch_flag, "Expected instruction launched");
     $finish;
   end
