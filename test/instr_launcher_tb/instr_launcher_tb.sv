@@ -35,26 +35,32 @@ module instr_launcher_tb;
   `CREATE_CLK(clk_i, 4ns, 6ns)
 
   // RTL Inputs
-  logic           arst_ni = 1;
-  logic           clear_i = 0;
+  logic arst_ni = 1;
+  logic clear_i = 0;
   decoded_instr_t instr_in_i;
-  logic           instr_in_valid_i;
-  locks_t         locks_i;
-  logic           instr_out_ready_i;
+  logic instr_in_valid_i;
+  locks_t locks_i;
+  logic instr_out_ready_i;
 
   // RTL Outputs
-  logic           instr_in_ready_o;
+  logic instr_in_ready_o;
   decoded_instr_t instr_out_o;
-  logic           instr_out_valid_o;
+  logic instr_out_valid_o;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-VARIABLES
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  event           locked_register_access_violation;
-  int             full_mailbox = 0;
-  decoded_instr_t temp_instr;
-  decoded_instr_t temp_q                           [$];
+  decoded_instr_t __instr_out__;
+  logic instr_mismatch_flag;
+  const int NO_max = maverickOne_pkg::NUM_OUTSTANDING + 1;
+  decoded_instr_t pipeline_stage[maverickOne_pkg::NUM_OUTSTANDING + 1];
+  bit [maverickOne_pkg::NUM_OUTSTANDING:0] instr_validity;
+  logic [maverickOne_pkg::NUM_OUTSTANDING:0] instr_wren;
+  bit instr_readyness;
+  int pipeline_fullness;
+  logic pipeline_full;
+  logic memory_blocked;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-RTLS
@@ -84,6 +90,7 @@ module instr_launcher_tb;
     arst_ni           <= '0;
     clk_i             <= '0;
     clear_i           <= '0;
+    locks_i           <= '0;
     instr_in_i        <= '0;
     instr_in_valid_i  <= '0;
     instr_out_ready_i <= '0;
@@ -100,16 +107,17 @@ module instr_launcher_tb;
     fork
       forever begin
         @(posedge clk_i);
-        locks_i <= $urandom_range(0, (2 ** (NUM_REGS) - 1));  // register locks profile input
-
-        // instr_in_i.func <= maverickOne_pkg::func_t'($urandom);
+        // clear_i <= $urandom_range(0, 99) < 2;  // 2% chance of clear
+        clear_i <= '0;  // 2% chance of clear
+        instr_in_valid_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
+        instr_out_ready_i <= $urandom_range(0, 99) < 50;  // data input valid 50% times
+        locks_i <= $urandom;  // register locks profile input
+        instr_in_i.func <= 1 << $urandom_range(0, maverickOne_pkg::TOTAL_FUNCS - 1);
         instr_in_i.rd <= $urandom_range(0, NUM_REGS - 1);
-        // instr_in_i.rs1 <= $urandom_range(0, NUM_REGS-1);
-        // instr_in_i.rs2 <= $urandom_range(0, NUM_REGS-1);
-        // instr_in_i.rs3 <= $urandom_range(0, NUM_REGS-1);
-        // instr_in_i.imm <= $urandom;
-        // instr_in_i.pc <= $urandom;
+        instr_in_i.imm <= $urandom_range(0, NUM_REGS - 1);
+        instr_in_i.pc <= $urandom_range(0, NUM_REGS - 1);
         instr_in_i.blocking <= $urandom;
+        instr_in_i.mem_op <= $urandom & ~instr_in_i.blocking;
         instr_in_i.reg_req <= (1 << $urandom_range(
             0, NUM_REGS - 1
         )) | (1 << $urandom_range(
@@ -118,79 +126,159 @@ module instr_launcher_tb;
             0, NUM_REGS - 1
         ));
 
-        clear_i <= $urandom_range(0, 99) < 2;  // 2% chance of clear
-
-        instr_in_valid_i <= $urandom_range(0, 99) < 50;  // data input valid 60% times
-        instr_out_ready_i <= $urandom_range(0, 99) < 50;  // data input valid 60% times
+        // Display Driver Outputs
+        $write("[%.3t] Driver time\n", $realtime);
+        // // $write("clear_i: 0b%b\n", clear_i);
+        // $write("instr_in_i: %p\n", instr_in_i);
+        $write("instr_in_valid_i: 0b%b\n", instr_in_valid_i);
+        $write("instr_in_ready_o: 0b%b\n", instr_in_ready_o);
+        // $write("instr_out_o: %p\n", instr_out_o);
+        $write("instr_out_valid_o 0b%b\n", instr_out_valid_o);
+        $write("instr_out_ready_i: 0b%b\n", instr_out_ready_i);
+        $write("\n");
       end
     join_none
   endtask
 
   task automatic start_in_out_monitor();
-    decoded_instr_t __instr_in__;
-    decoded_instr_t __instr_out__;
-
-    mailbox #(decoded_instr_t) in_mbx = new(maverickOne_pkg::NUM_OUTSTANDING);
-    mailbox #(decoded_instr_t) out_mbx = new();
+    instr_validity = '0;
+    instr_readyness = '0;
+    instr_wren = '1;
+    instr_mismatch_flag = '0;
+    pipeline_fullness = 0;
+    pipeline_full = '0;
     fork
-      begin
-        forever begin
-          @(posedge clk_i);
-          if (arst_ni & ~clear_i) begin
-            if (instr_in_valid_i === 1 & instr_in_ready_o === 1) in_mbx.put(instr_in_i);
-          end else begin
-            while (in_mbx.num()) in_mbx.get(__instr_in__);
-            while (out_mbx.num()) out_mbx.get(__instr_out__);
-          end
-        end
-      end
-      begin
-        forever begin
-          @(posedge clk_i);
-          if (arst_ni & ~clear_i) begin
-            if (instr_out_valid_o === 1 & instr_out_ready_i === 1) out_mbx.put(instr_out_o);
+      forever begin
+        @(posedge clk_i);
+        memory_blocked = '0;
 
-            if (out_mbx.num()) begin
-              out_mbx.get(__instr_out__);
-              if (in_mbx.num()) cascaded_locks(in_mbx, __instr_out__, locks_i);
-              if (|(__instr_out__.reg_req & locks_i))->locked_register_access_violation;
+        $write("[%.3t] Monitor time\n", $realtime);
+
+        if (~arst_ni | clear_i) begin
+          // __instr_out__ <= 'x;
+          instr_validity <= '0;
+          instr_wren <= '1;
+        end else if (arst_ni & ~clear_i) begin
+
+          for (int i = NO_max - 1; i >= 0; i--) begin
+            $write(
+                // "pipeline%02d:\n%p\nreg_req: 0b%b\n", i, pipeline_stage[i], pipeline_stage[i].reg_req
+                "pipeline%02d:\treg_req: 0b%0d\tmem_op: 0b%b\tblocking: 0b%b\t", i,
+                pipeline_stage[i].reg_req, pipeline_stage[i].mem_op, pipeline_stage[i].blocking);
+            $write("writable: 0b%b\n", instr_wren[i]);
+          end
+
+          for (int i = NO_max - 1; i >= 0; i--) begin
+            if (~instr_wren[i]) begin
+
+              instr_validity[i] = bit'(~|(pipeline_stage[i].reg_req & locks_i));
+
+              if (pipeline_stage[i].blocking) begin
+
+                if (instr_validity[i] && instr_out_ready_i) begin
+                  __instr_out__ = pipeline_stage[i];
+                  instr_wren[i] = '1;
+                  pipeline_fullness--;
+                  break;
+                end else begin
+                  __instr_out__ = pipeline_stage[NO_max-1];
+                  if (i < NO_max - 1) begin
+                    if (instr_wren[i+1]) begin
+                      pipeline_stage[i+1] <= pipeline_stage[i];
+                      instr_wren[i+1] <= instr_wren[i];
+                      instr_wren[i] = '1;
+                    end
+                  end
+                  locks_i = '1;
+                  break;
+                end
+
+              end else if (pipeline_stage[i].mem_op) begin
+
+                if (instr_validity[i] && instr_out_ready_i && ~memory_blocked) begin
+                  __instr_out__ = pipeline_stage[i];
+                  instr_wren[i] = '1;
+                  pipeline_fullness--;
+                  break;
+                end else begin
+                  __instr_out__  = pipeline_stage[NO_max-1];
+                  memory_blocked = '1;
+                  if (i < NO_max - 1) begin
+                    if (instr_wren[i+1]) begin
+                      pipeline_stage[i+1] <= pipeline_stage[i];
+                      instr_wren[i+1] <= instr_wren[i];
+                      instr_wren[i] = '1;
+                    end
+                  end
+                  locks_i = (1 << pipeline_stage[i].rd) | locks_i;
+                  continue;
+                end
+
+              end else if (pipeline_stage[i] !== 'x) begin
+
+                if (instr_validity[i] && instr_out_ready_i) begin
+                  __instr_out__ = pipeline_stage[i];
+                  instr_wren[i] = '1;
+                  pipeline_fullness--;
+                  break;
+                end else begin
+                  __instr_out__ = pipeline_stage[NO_max-1];
+                  if (i < NO_max - 1) begin
+                    if (instr_wren[i+1]) begin
+                      pipeline_stage[i+1] <= pipeline_stage[i];
+                      instr_wren[i+1] <= instr_wren[i];
+                      instr_wren[i] = '1;
+                    end
+                  end
+                  locks_i = (1 << pipeline_stage[i].rd) | locks_i;
+                  continue;
+                end
+
+              end
+
             end
-
-          end else begin
-            while (in_mbx.num()) in_mbx.get(__instr_in__);
-            while (out_mbx.num()) out_mbx.get(__instr_out__);
           end
+
+          if (pipeline_fullness == NO_max) pipeline_full = '1;
+          else pipeline_full = '0;
+
+          instr_readyness = ~pipeline_full;
+          // if (instr_in_valid_i && (instr_in_ready_o && instr_readyness)) begin
+          if (instr_in_valid_i && instr_readyness && instr_wren[0]) begin
+            pipeline_stage[0] <= instr_in_i;
+            instr_wren[0] <= '0;
+            pipeline_fullness++;
+          end
+
+          if (instr_out_valid_o && instr_out_ready_i && (__instr_out__ !== instr_out_o)) begin
+            instr_mismatch_flag = '1;
+            $write("[%.3t] Mismatch: 0b%b\n", $realtime, instr_mismatch_flag);
+            $write("instr_out_tb : %p\nValid: 0b%b\tmem_op: 0b%b\tblocking: 0b%b\n",
+                   __instr_out__.reg_req, instr_validity, __instr_out__.mem_op,
+                   __instr_out__.blocking);
+            $write("instr_out_rtl: %p\nValid: 0b%b\tmem_op: 0b%b\tblocking: 0b%b\n",
+                   instr_out_o.reg_req, instr_out_valid_o, instr_out_o.mem_op,
+                   instr_out_o.blocking);
+            // $fatal(1, "Mismatch found");
+          end
+
+          // $write("instr_out_tb : %p\n", __instr_out__);
+          // $write("instr_out_rtl: %p\n", instr_out_o);
+          $write("instr_out_tb : %0d\n", __instr_out__.reg_req);
+          $write("instr_out_rtl: %0d\n", instr_out_o.reg_req);
+
+        end else if (clear_i) begin
+          for (int i = NO_max - 1; i >= 0; i--) begin
+            pipeline_stage[i] = 'x;
+          end
+          pipeline_full = '0;
+          instr_wren = '1;
+          instr_validity = '1;
         end
+        $write("\n");
       end
     join_none
   endtask
-
-  task automatic cascaded_locks(mailbox#(decoded_instr_t) in_mbx, decoded_instr_t __instr_out__,
-                                inout locks_t locks_i);
-    while (in_mbx.num()) begin
-      in_mbx.get(temp_instr);
-      temp_q.push_back(temp_instr);
-    end
-
-    foreach (temp_q[i]) begin
-      if (temp_q[i] === __instr_out__) break;
-      locks_i |= (1 << temp_q[i].rd);
-    end
-
-    foreach (temp_q[i]) begin
-      if (temp_q[i] === __instr_out__) continue;
-      in_mbx.put(temp_q[i]);
-    end
-
-  endtask
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  //-SEQUENTIALS
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-
-  always @(locked_register_access_violation) begin
-    result_print(0, "Locked Registers Access Denied");
-  end
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
   //-PROCEDURALS
@@ -204,8 +292,15 @@ module instr_launcher_tb;
   end
 
   initial begin
-    repeat (10000) @(posedge clk_i);
-    result_print(1, "Locked Registers Access Denied");
+    repeat (51) @(posedge clk_i);
+    result_print(~instr_mismatch_flag, "Expected instruction launched");
+    $finish;
+  end
+
+  initial begin
+    // #1ms;
+    repeat (150001) @(posedge clk_i);
+    result_print(0, "FATAL TIMEOUT");
     $finish;
   end
 
