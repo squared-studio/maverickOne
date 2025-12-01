@@ -47,10 +47,13 @@ module reg_gnt_ckr #(
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Update memory busy flag for the next operation.
-  always_comb mem_busy_o = mem_busy_i | mem_op_i;
+  always_comb mem_busy_o = mem_busy_i | (mem_op_i && mem_busy_i); // Updated condition to avoid 'x
 
   // Generate arbiter request signal based on memory operation and locked registers.
-  always_comb arb_req_o = ~(mem_op_i & mem_busy_i) ? (pl_valid_i & ~(|(locks_i & reg_req_i))) : '0;
+  // always_comb arb_req_o = ~(mem_op_i & mem_busy_i) ? (pl_valid_i & ~(|(locks_i & reg_req_i))) : '0;
+  always_comb
+    arb_req_o = pl_valid_i ? ((mem_op_i & mem_busy_i) ? '0 :
+  (pl_valid_i & ~(|(locks_i & reg_req_i)))) : '0; // TODO: OPTIMIZE
 
   // Update locked registers based on the current pipeline state and blocking signal.
   always_comb begin
@@ -61,7 +64,8 @@ module reg_gnt_ckr #(
       if (blocking_i) begin
         locks_o = '1;
       end else begin
-        locks_mask[rd_i] = |rd_i;
+        // locks_mask[rd_i] = |rd_i;
+        locks_mask[rd_i] = '1; // hardcoded this
         locks_o |= locks_mask;
       end
     end

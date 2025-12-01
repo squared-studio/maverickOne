@@ -245,7 +245,7 @@ build/dump.vcd:
 	@make simulate TOP=$(TOP) VCD=1
 
 .PHONY: wave
-wave: build/dump.vcd
+wave: clean build/dump.vcd
 	@gtkwave build/dump.vcd
 
 #########################################################################################
