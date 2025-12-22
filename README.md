@@ -28,4 +28,3 @@ The `maverickOne` is a 64-bit RISC-V compliant core designed in SystemVerilog. I
 ### [Module List](./document/rtl/modules.md)
 
 ### [Coding Guide Lines](./document/coding_guideline.md) ([verible-verilog-lint](https://github.com/chipsalliance/verible))
-
